@@ -12,6 +12,7 @@ Much of the documentation for Gameboy development assumes running on Windows - o
 # Learning resources
 There's quite a bit of info for Gameboy development. Here I'll be listing resources I found particularly useful for programming using RGBDS/Wiz.
 
+* [The Ultimate Gameboy Talk](https://www.youtube.com/watch?v=CImyDBJSTsQ) from the 33rd Chaos Communication Congress.
 * The latest [Pan Doc](http://bgb.bircd.org/pandocs.htm) aka, "Everything you always wanted to know about Gameboy but were afraid to ask." In-depth technical specifications of the system.
 * Gameboy Dev's [ASM School](http://gameboy.mongenel.com/asmschool.html). Collection of absolute beginner tutorials using RGBDS. Unfortunately, it is incomplete. Provides a good amount of background information on the system and some very initial programming.
 * Wichita State University's [ECE 238](http://cratel.wichita.edu/cratel/ECE238Spr08) course page. Course in assembly taught using Gameboy programming. Surprisingly excellent resource.
