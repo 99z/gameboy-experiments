@@ -49,3 +49,22 @@ do this with BC and DE
 * Dest and source are self-explanatory
 * ZNHC lists results of the 4 bits in the F register from performing the instruction
 	* Crib sheet lists what each of these represent
+
+## 8-bit arithmetic and logical instructions
+* `ADD` = simple add, can use immediate, register, or byte in memory 
+addressed by `HL`
+* `ADC` = add with contents of carry flag added to result. Used for large 
+integer addition
+* `SUB` = simple subtraction, but does not take destination. Single operand 
+is instead subtracted from `A` and put in `A`
+* `SBC` = subtract with carry
+* `AND/OR/XOR` = standard
+* `CP` = ComPares operand with contents of accumulator by subtracting. Same 
+as SUB but the contents of A aren't changed, just the flags
+
+# 16-bit arithmetic
+**Note**: GB is, of course, 8-bit cpu so these aren't used much.
+* `ADD HL, rr` = adds contents of register pair `rr` to pair `HL`. `rr` can 
+be `BC/DE/HL/SP`
+* `INC rr` = increment pair by one
+* `DEC rr` = decrement pair by one
