@@ -40,3 +40,12 @@ D with $FF and E with $80
 * `LD D, (HL)` = loads D with byte at address in HL
 * `LD A, (BC)` = loads A with memory address in BC. Can only 
 do this with BC and DE
+
+# Instructions
+## How to read crib sheet
+![](https://files.catbox.moe/1m61fq.png)
+
+* Op-codes grouped by instruction, listed for each possible variation
+* Dest and source are self-explanatory
+* ZNHC lists results of the 4 bits in the F register from performing the instruction
+	* Crib sheet lists what each of these represent
