@@ -40,3 +40,4 @@ Listing of other tools/resources that might be helpful.
 * [Awesome Game Boy Development](https://github.com/avivace/awesome-gbdev). Basically a larger, better version of this document :)
 * [GBT Player](https://github.com/AntonioND/gbt-player). Used for sound/music composition for use with RGBDS.
  * "Successor" to Lemon Player. Both GBT and Lemon require music in MOD format to convert to GBDK/RGBDS, so I'll probably be using [MilkyTracker](http://milkytracker.titandemo.org).
+* [Brew tool](http://make.vg/brewtool/) - Might be useful, in particular the map tool. Can feed it an image and have tilesets be generated.
