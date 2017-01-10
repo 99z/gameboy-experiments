@@ -2,19 +2,14 @@
 #include <gb/gb.h> // required
 #include <gb/hardware.h> // hardware references
 
-// FUNCTION DECLARATIONS
-void initGame(); // INITIALISE OUR GAME
-void updatePlayer(); // UPDATE OUR PLAYER
-UINT8 collisionCheck(UINT8, UINT8, UINT8, UINT8, UINT8, UINT8, UINT8, UINT8); 	// SIMPLE RECT TO RECT CHECK
-
-// VARIABLE DECLARATIONS - STORED IN RAM
-UINT8 i, j;																		// GENERIC LOOPING VARIABLE
-
-UINT8 playerX, playerY;															// PLAYER CO-ORDINATES
-UINT8 eX[10], eY[10];															// ENEMY CO-ORDINATES
-UINT8 lastKeys;																	// HOLDS KEYS FOR THE PREVIOUS FRAME
-
-UINT8 randomBkgTiles[20]; // CONTAINS RANDOM DATA FOR OUR BKG
+void initGame();
+void updatePlayer();
+UINT8 collisionCheck(UINT8, UINT8, UINT8, UINT8, UINT8, UINT8, UINT8, UINT8);
+UINT8 i, j;
+UINT8 playerX, playerY;
+UINT8 eX[10], eY[10];
+UINT8 lastKeys; // stores keys for previous frame
+UINT8 randomBkgTiles[20]; // background tile data
 
 // sprite data - 14 sprites here, 16 bits each (8x8)
 // stored as an array of bits
@@ -30,11 +25,6 @@ void main() {
 	initGame();
 
 	while(1) {
-		NR10_REG = 0x1E;
-		NR11_REG = 0x10;
-		NR12_REG = 0xF3;
-		NR13_REG = 0x00;
-		NR14_REG = 0x87;
 		updatePlayer(); // update player position
 		HIDE_WIN; // Hide window layer - no windows used
 		SHOW_SPRITES; // Show sprites layer
@@ -45,140 +35,115 @@ void main() {
 }
 
 void initGame(){
-	
-	DISPLAY_ON; // TURNS ON THE GAMEBOY LCD
-	NR52_REG = 0x8F; // TURN SOUND ON
-	NR51_REG = 0x11; // ENABLE SOUND CHANNELS
-	NR50_REG = 0x77; // VOLUME MAX = 0x77, MIN = 0x00
-	
-	initrand(DIV_REG);															// SEED OUR RANDOMIZER
-	
-	set_sprite_data(0, 14, sprites);											// STORE OUR SPRITE DATA AT THE START OF SPRITE VRAM
-	set_bkg_data(0, 4, myBkgData);												// STORE OUR BKG DATA AT THE START OF BKG VRAM - NOTE, THE WINDOW LAYER SHARED THE BKG VRAM BY DEFAULT
+	DISPLAY_ON; // turns on gameboy lcd
+	NR52_REG = 0x8F; // sound on
+	NR51_REG = 0x11; // both sound channels
+	NR50_REG = 0x77; // volume level, max = 0x77, min = 0x00
 
-	playerX = 64;																// PLAYERS INITAL X POSITION
-	playerY = 64;																// PLAYERS INITAL Y POSITION
-	
-	set_sprite_tile(0,0);														//PLAYERS SPRITE TILE - 0
-	
-		for (i=0; i !=10; i++){													// OUR ENEMY POSITION LOOP - NOTE, USE !=, NOT < TO SCRAPE BACK SOME CPU TIME
-		
-		eX[i] = 16+(rand() >> 1);												// RANDOM X POSITION 16 - 144
-		eY[i] = 16+(rand() >> 1);												// RANDOM Y POSITION 16 - 144
-		set_sprite_tile(i+1, 2);												// ENEMIES SRITE TILE - SET TO SPRITE 2
-		move_sprite(i+1,eX[i], eY[i]);											// POSITION ENEMIES	
-		
-		}
-		
-		
-		// GENERATE RANDOM BKG TILE DATA - SO STARRY!
-		
-		for (j=0; j != 18; j++){
-		
-			for (i=0; i != 20; i++){		
-			randomBkgTiles[i] = rand() % 4;		
-			}
-		
-		set_bkg_tiles(0,j,20,1,randomBkgTiles);									// SET A LINE OF BKG DATA (X, Y, W, H, DATA)
-		}
-	
+	initrand(DIV_REG); // part of gb/rand.h, want to use DIV_REG as per the documentation
+	set_sprite_data(0, 14, sprites); // storing sprite data
+	set_bkg_data(0, 4, myBkgData); // storing background data - window layer shares this
+
+	playerX = 64; // initial x position for player
+	playerY = 64; // initial y position for player
+
+	set_sprite_tile(0,0); // sprite tile representing the player - is first sprite, so 0th index
+
+	// use != in for loops to save cpu time
+	for (i=0; i !=10; i++) {
+		eX[i] = 16+(rand() >> 1); // random x position between 16 and 144
+		eY[i] = 16+(rand() >> 1); // random y position between 16 and 144
+		set_sprite_tile(i+1, 2); // enemy sprite tile set to 2
+		move_sprite(i+1,eX[i], eY[i]); // place enemies
 	}
 
-////////////////////////////////////////////////////////////////////////////////
-// UPDATE PLAYER
+	// generate random background tile data
+	for (j=0; j != 18; j++) {
+		for (i=0; i != 20; i++) {
+			randomBkgTiles[i] = rand() % 4;
+		}
+		set_bkg_tiles(0,j,20,1,randomBkgTiles); // x, y, width, height, background tiles
+	}
 
-	void updatePlayer(){
-	
-	// MOTION VIA DPAD - LIMITED TO A CERTAIN AREA ON SCREEN
-	
-	// UP
-		if (joypad() & J_UP){
+}
+
+void updatePlayer(){
+
+	// handling movement via dpad
+
+	if (joypad() & J_UP) {
 		playerY--;
-			if (playerY == 15){
+		if (playerY == 15) {
 			playerY = 16;
-			}
 		}
+	}
 
-	// DOWN
-		if (joypad() & J_DOWN){
+	if (joypad() & J_DOWN){
 		playerY++;
-			if (playerY == 153){
+		if (playerY == 153){
 			playerY = 152;
-			}
 		}
+	}
 
-	// LEFT
-		if (joypad() & J_LEFT){
+	if (joypad() & J_LEFT){
 		playerX--;
-			if (playerX == 7){
+		if (playerX == 7){
 			playerX = 8;
-			}
-		}	
-	
-	// RIGHT
-		if (joypad() & J_RIGHT){
+		}
+	}
+
+	if (joypad() & J_RIGHT){
 		playerX++;
-			if (playerX == 161){
+		if (playerX == 161){
 			playerX = 160;
-			}
-		}	
-	
-	// END MOTION VIA DPAD
-	
-	// TAP A - PLAYS A RANDOM BEEP THROUGH SOUND CHANNEL 1 - SQUARE WAVE CHANNEL
-	
-		if (joypad() & J_A){
-		
-		NR11_REG = 0x7f; 													// SQUARE WAVE DUTY
-		NR12_REG = 0x7f; 													// VOLUME 0 = quietest, 255 = loudest
-		NR13_REG = DIV_REG;													// LOWER BITS OF SOUND FREQ
-		NR14_REG = 0x80 + (DIV_REG % 8); 									// LARGER SOUND FREQ - MINIMUM OF 128 - TOP 3 BYTES - ANY LESS = SOUND CHANNEL SWITCHES OFF
-		} else {
-		NR11_REG = 0x00;													// NO A BUTTON - NO SOUND
+		}
+	}
+
+	// hitting A plays a random sound via channel #1
+	if (joypad() & J_A) {
+		NR11_REG = 0x7f; // audio channel #1, wave pattern duty
+		NR12_REG = 0x7f; // volume for 11
+		NR13_REG = DIV_REG; // sound frequency least significant bit
+		NR14_REG = 0x80 + (DIV_REG % 8); // sound frequency significant 3 bits
+	} else {
+		// making sure no sound plays if the A button is NOT being pressed
+		NR11_REG = 0x00;
 		NR12_REG = 0x00;
 		NR13_REG = 0x00;
 		NR14_REG = 0x00;
-		}
+	}
 
+	move_sprite(0,playerX,playerY); // position player sprite on screen
 
-	//MOVE OUR SPRITE
-	move_sprite(0,playerX,playerY);												// POSITION OUR SPRITE ON THE SCREEN	
-	
-	j=0;																		// RE-USE J AS A FLAG TO SEE IF WE HAVE COLLIDED WITH AN ENEMY
-	
-		for (i=0; i != 10; i++){												// LOOP THROUGH OUR 10 ENEMIES
-		
-			if (collisionCheck(playerX, playerY, 8, 8, eX[i], eY[i], 8, 8) == 1){
-			j= 1;																// IF WE COLLIDED, SET OUR FLAG VARIABLE, J TO 1
-			}
-			
+	j = 0; // re use j for collision - saves space
+
+	for (i=0; i != 10; i++) {
+		if (collisionCheck(playerX, playerY, 8, 8, eX[i], eY[i], 8, 8) == 1){
+			j= 1; // if a collision happens
 		}
-		
-		// ADJUST OUR PLAYER SPRITES FRAME IF THEY HIT SOMETHING
-		switch (j){
-		// NO HIT
-		case 0:
+	}
+
+	// changes player sprite if we hit an enemy
+	switch (j) {
+	// didn't hit
+	case 0:
 		set_sprite_tile(0,0);
 		break;
-		
-		// HIT ENEMY
-		default:
+
+	// hit
+	default:
 		set_sprite_tile(0,1);
-		break;		
-		}
-	
+		break;
 	}
 
-////////////////////////////////////////////////////////////////////////////////
-// COLLISION CHECKER - SIMPLE RECTANGLE COLLISION CHECKING
-// RETURNS 1 IF OVERLAPPING
+}
 
-	UINT8 collisionCheck(UINT8 x1, UINT8 y1, UINT8 w1, UINT8 h1, UINT8 x2, UINT8 y2, UINT8 w2, UINT8 h2){
-
-		if ((x1 < (x2+w2)) && ((x1+w1) > x2) && (y1 < (h2+y2)) && ((y1+h1) > y2)){
+// simple collision checking, returns 1 for collision
+UINT8 collisionCheck(UINT8 x1, UINT8 y1, UINT8 w1, UINT8 h1, UINT8 x2, UINT8 y2, UINT8 w2, UINT8 h2){
+	if ((x1 < (x2+w2)) && ((x1+w1) > x2) && (y1 < (h2+y2)) && ((y1+h1) > y2)){
 		return 1;
-		} else {
+	} else {
 		return 0;
-		}
-
 	}
+
+}
