@@ -1,0 +1,13 @@
+-mjwx
+-i a.ihx
+-b _CODE = 0x0200
+-b _DATA = 0xc0a0
+-k /Users/egg/code/gbdk-n/bin/../lib
+-k /opt/local/bin/../share/sdcc/lib/gbz80
+-k /opt/local/share/sdcc/lib/gbz80
+-l gb.lib
+-l gbz80
+/Users/egg/code/gbdk-n/bin/../lib/crt0.rel
+shooting.rel
+
+-e

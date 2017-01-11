@@ -1,0 +1,54 @@
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy Z80-like CPU), page 1.
+Hexadecimal [16-Bits]
+
+Symbol Table
+
+    .__.$$$.                                                    =  2710 L
+    .__.ABS.                                                    =  0000 G
+    .__.CPU.                                                    =  0000 L
+    .__.H$L.                                                    =  0000 L
+    __modsint                                                      **** GX
+  1 _bulletDir                                                     0031 GR
+  1 _bulletLive                                                    0030 GR
+  1 _bulletX                                                       002E GR
+  1 _bulletY                                                       002F GR
+  0 _collisionCheck                                                0688 GR
+  1 _eX                                                            0005 GR
+  1 _eY                                                            000F GR
+  1 _i                                                             0000 GR
+  0 _initGame                                                      016F GR
+    _initrand                                                      **** GX
+  1 _j                                                             0001 GR
+    _joypad                                                        **** GX
+  1 _lastKeys                                                      0019 GR
+  0 _main                                                          0000 GR
+    _move_sprite                                                   **** GX
+  0 _myBkgData                                                     011F GR
+  1 _playerDir                                                     0004 GR
+  1 _playerX                                                       0002 GR
+  1 _playerY                                                       0003 GR
+    _rand                                                          **** GX
+  1 _randomBkgTiles                                                001A GR
+    _set_bkg_data                                                  **** GX
+    _set_bkg_tiles                                                 **** GX
+    _set_sprite_data                                               **** GX
+    _set_sprite_tile                                               **** GX
+  1 _shooting                                                      0032 GR
+  0 _sprites                                                       003F GR
+  0 _updatePlayer                                                  02A3 GR
+    _wait_vbl_done                                                 **** GX
+
+
+ASxxxx Assembler V02.00 + NoICE + SDCC mods  (GameBoy Z80-like CPU), page 2.
+Hexadecimal [16-Bits]
+
+Area Table
+
+   0 _CODE                                      size  752   flags    0
+   1 _DATA                                      size   33   flags    0
+   2 _DABS                                      size    0   flags    8
+   3 _HOME                                      size    0   flags    0
+   4 _GSINIT                                    size    0   flags    0
+   5 _GSFINAL                                   size    0   flags    0
+   6 _CABS                                      size    0   flags    8
+
