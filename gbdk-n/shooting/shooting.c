@@ -12,6 +12,14 @@ UINT8 lastKeys; // stores keys for previous frame
 UINT8 randomBkgTiles[20]; // background tile data
 UINT8 bulletX, bulletY, bulletLive, bulletDir, shooting; // bullet data
 
+typedef struct {
+    UBYTE x;
+    UBYTE y;
+    UBYTE alive;
+    UBYTE direction;
+} Bullet;
+
+Bullet bullets[1];
 // sprite data - 14 sprites here, 16 bits each (8x8)
 // stored as an array of bits
 const unsigned char sprites[] = {0xFF,0xFF,0x81,0x81,0xA5,0xA5,0xA5,0xA5,0x81,0x81,0x99,0x99,0x81,0x81,0xFF,0xFF,0x3C,0x3C,0x42,0x42,0x81,0x81,0xED,0xED,0x81,0x81,0x91,0x91,0x42,0x42,0x3C,0x3C,0x99,0x81,0x42,0x5A,0x24,0x3C,0x99,0x7E,0x99,0x7E,0x24,0x3C,0x42,0x5A,0x99,0x81,0x38,0x04,0x7C,0x02,0x5C,0x22,0x5C,0x22,0x5C,0x22,0x5C,0x22,0x7C,0x02,0x38,0x04,0x00,0x00,0x3E,0x3E,0x63,0x63,0x63,0x63,0x63,0x63,0x63,0x63,0x3E,0x3E,0x00,0x00,0x00,0x00,0x1C,0x1C,0x3C,0x3C,0x6C,0x6C,0x0C,0x0C,0x0C,0x0C,0x7F,0x7F,0x00,0x00,0x00,0x00,0x3E,0x3E,0x63,0x63,0x03,0x03,0x1E,0x1E,0x70,0x70,0x7F,0x7F,0x00,0x00,0x00,0x00,0x7F,0x7F,0x03,0x03,0x3E,0x3E,0x07,0x07,0x43,0x43,0x3E,0x3E,0x00,0x00,0x00,0x00,0x60,0x60,0x6C,0x6C,0x6C,0x6C,0x7F,0x7F,0x0C,0x0C,0x0C,0x0C,0x00,0x00,0x00,0x00,0x7F,0x7F,0x60,0x60,0x7E,0x7E,0x03,0x03,0x63,0x63,0x3E,0x3E,0x00,0x00,0x00,0x00,0x3F,0x3F,0x60,0x60,0x7E,0x7E,0x63,0x63,0x63,0x63,0x3E,0x3E,0x00,0x00,0x00,0x00,0x7F,0x7F,0x03,0x03,0x06,0x06,0x0C,0x0C,0x18,0x18,0x30,0x30,0x00,0x00,0x00,0x00,0x3E,0x3E,0x63,0x63,0x63,0x63,0x3E,0x3E,0x63,0x63,0x3E,0x3E,0x00,0x00,0x00,0x00,0x3E,0x3E,0x63,0x63,0x63,0x63,0x3F,0x3F,0x03,0x03,0x7E,0x7E,0x00,0x00};
@@ -58,9 +66,16 @@ void initGame(){
 		move_sprite(i+1,eX[i], eY[i]); // place enemies
 	}
 
-	bulletLive = 0;
+	// bulletLive = 0;
 	shooting = 0;
 	set_sprite_tile(12, 3); // sets sprite tile 03 to index 12
+	
+	for (i = 0; i != 1; i++) {
+		bullets[i].x = 0;
+		bullets[i].y = 0;
+		bullets[i].alive = 0;
+		bullets[i].direction = 0;
+	}
 
 	// generate random background tile data
 	for (j=0; j != 18; j++) {
@@ -72,30 +87,30 @@ void initGame(){
 
 }
 
-void updatePlayer(){
+void updatePlayer() {
 
 	// handling movement via dpad
 
 	if (joypad() & J_UP) {
-		playerY--;
 
 		shooting = 1;
 		playerDir = 0;
 		
-		if (bulletLive == 0) {
-			bulletLive = 1;
+		if (bullets[0].alive == 0) {
+			bullets[0].alive = 1;
+			playerY += 2;
 
 			if (joypad() & J_LEFT) {
-				bulletDir = 4;
+				bullets[0].direction = 4;
 			} else if (joypad() & J_RIGHT) {
-				bulletDir = 5;
+				bullets[0].direction = 5;
 			} else {
-				bulletDir = 0;
+				bullets[0].direction = 0;
 			}
 
-			bulletX = playerX;
-			bulletY = playerY;
-			move_sprite(12, bulletX, bulletY); // places sprite on screen
+			bullets[0].x = playerX;
+			bullets[0].y = playerY;
+			move_sprite(12, bullets[0].x, bullets[0].y); // places sprite on screen
 		}
 		if (playerY == 15) {
 			playerY = 16;
@@ -103,25 +118,25 @@ void updatePlayer(){
 	}
 
 	if (joypad() & J_DOWN){
-		playerY++;
 
 		shooting = 1;
 		playerDir = 2;
 		
-		if (bulletLive == 0) {
-			bulletLive = 1;
+		if (bullets[0].alive == 0) {
+			bullets[0].alive = 1;
+			playerY -= 2;
 			
 			if (joypad() & J_LEFT) {
-				bulletDir = 7;
+				bullets[0].direction = 7;
 			} else if (joypad() & J_RIGHT) {
-				bulletDir = 6;
+				bullets[0].direction = 6;
 			} else {
-				bulletDir = 2;
+				bullets[0].direction = 2;
 			}
 
-			bulletX = playerX;
-			bulletY = playerY;
-			move_sprite(12, bulletX, bulletY); // places sprite on screen
+			bullets[0].x = playerX;
+			bullets[0].y = playerY;
+			move_sprite(12, bullets[0].x, bullets[0].y); // places sprite on screen
 		}
 		if (playerY == 153){
 			playerY = 152;
@@ -129,17 +144,17 @@ void updatePlayer(){
 	}
 
 	if (joypad() & J_LEFT){
-		playerX--;
 		
 		shooting = 1;
 		playerDir = 3;
 
-		if (bulletLive == 0) {
-			bulletLive = 1;
-			bulletDir = 3;
-			bulletX = playerX;
-			bulletY = playerY;
-			move_sprite(12, bulletX, bulletY); // places sprite on screen
+		if (bullets[0].alive == 0) {
+			bullets[0].alive = 1;
+			playerX += 2;
+			bullets[0].direction = 3;
+			bullets[0].x = playerX;
+			bullets[0].y = playerY;
+			move_sprite(12, bullets[0].x, bullets[0].y); // places sprite on screen
 		}
 		if (playerX == 7){
 			playerX = 8;
@@ -147,17 +162,17 @@ void updatePlayer(){
 	}
 
 	if (joypad() & J_RIGHT){
-		playerX++;
 		
 		shooting = 1;
 		playerDir = 1;
 
-		if (bulletLive == 0) {
-			bulletLive = 1;
-			bulletDir = 1;
-			bulletX = playerX;
-			bulletY = playerY;
-			move_sprite(12, bulletX, bulletY); // places sprite on screen
+		if (bullets[0].alive == 0) {
+			bullets[0].alive = 1;
+			playerX -= 2;
+			bullets[0].direction = 1;
+			bullets[0].x = playerX;
+			bullets[0].y = playerY;
+			move_sprite(12, bullets[0].x, bullets[0].y); // places sprite on screen
 		}
 		if (playerX == 161){
 			playerX = 160;
@@ -184,65 +199,66 @@ void updatePlayer(){
 
 	move_sprite(0,playerX,playerY); // position player sprite on screen
 
-	if (bulletX > 160 || bulletX == 0 || bulletY > 152 || bulletY == 0) {
+	if (bullets[0].x > 160 || bullets[0].x == 0 || bullets[0].y > 152 || bullets[0].y == 0) {
 		if (shooting == 1) {
-			bulletLive = 1;
+			bullets[0].alive = 1;
 			switch (playerDir) {
 				case 0:
-					bulletX = playerX;
-					bulletY = playerY - 8;
+					bullets[0].x = playerX;
+					bullets[0].y = playerY - 8;
+					break;
 				case 1:
-					bulletX = playerX + 8;
-					bulletY = playerY;
+					bullets[0].x = playerX + 8;
+					bullets[0].y = playerY;
 					break;
 				case 2:
-					bulletX = playerX;
-					bulletY = playerY - 8;
+					bullets[0].x = playerX;
+					bullets[0].y = playerY - 8;
 					break;
 				case 3:
-					bulletX = playerX + 8;
-					bulletY = playerY;
+					bullets[0].x = playerX + 8;
+					bullets[0].y = playerY;
 					break;
 			}
 		} else {
-			bulletLive = 0;
-			bulletX = 0;
-			bulletY = 0;
+			bullets[0].alive = 0;
+			bullets[0].x = 0;
+			bullets[0].y = 0;
 		}
 	} else {
-		switch (bulletDir) {
+		switch (bullets[0].direction) {
 			case 0:
-				bulletY = bulletY - 2;
+				bullets[0].y -= 5;
 				break;
 			case 1:
-				bulletX = bulletX + 2;
+				bullets[0].x += 5;
 				break;
 			case 2:
-				bulletY = bulletY + 2;
+				bullets[0].y += 5;
 				break;
 			case 3:
-				bulletX = bulletX - 2;
+				bullets[0].x -= 5;
 				break;
 			case 4:
-				bulletX = bulletX - 2;
-				bulletY = bulletY - 2;
+				bullets[0].x -= 5;
+				bullets[0].y -= 5;
 				break;
 			case 5:
-				bulletX = bulletX + 2;
-				bulletY = bulletY - 2;
+				bullets[0].x += 5;
+				bullets[0].y -= 5;
 				break;
 			case 6:
-				bulletX = bulletX + 2;
-				bulletY = bulletY + 2;
+				bullets[0].x += 5;
+				bullets[0].y += 5;
 				break;
 			case 7:
-				bulletX = bulletX - 2;
-				bulletY = bulletY + 2;
+				bullets[0].x -= 5;
+				bullets[0].y += 5;
 				break;
 		}
 	}
 
-	move_sprite(12, bulletX, bulletY);
+	move_sprite(12, bullets[0].x, bullets[0].y);
 
 	j = 0; // re use j for collision - saves space
 

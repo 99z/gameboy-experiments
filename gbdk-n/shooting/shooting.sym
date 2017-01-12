@@ -12,7 +12,8 @@ Symbol Table
   1 _bulletLive                                                    0030 GR
   1 _bulletX                                                       002E GR
   1 _bulletY                                                       002F GR
-  0 _collisionCheck                                                0688 GR
+  1 _bullets                                                       0033 GR
+  0 _collisionCheck                                                06CD GR
   1 _eX                                                            0005 GR
   1 _eY                                                            000F GR
   1 _i                                                             0000 GR
@@ -35,7 +36,7 @@ Symbol Table
     _set_sprite_tile                                               **** GX
   1 _shooting                                                      0032 GR
   0 _sprites                                                       003F GR
-  0 _updatePlayer                                                  02A3 GR
+  0 _updatePlayer                                                  030A GR
     _wait_vbl_done                                                 **** GX
 
 
@@ -44,8 +45,8 @@ Hexadecimal [16-Bits]
 
 Area Table
 
-   0 _CODE                                      size  752   flags    0
-   1 _DATA                                      size   33   flags    0
+   0 _CODE                                      size  797   flags    0
+   1 _DATA                                      size   37   flags    0
    2 _DABS                                      size    0   flags    8
    3 _HOME                                      size    0   flags    0
    4 _GSINIT                                    size    0   flags    0

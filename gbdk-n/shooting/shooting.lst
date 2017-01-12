@@ -17,1498 +17,1542 @@
                              17 	.globl _wait_vbl_done
                              18 	.globl _joypad
                              19 	.globl _initrand
-                             20 	.globl _shooting
-                             21 	.globl _bulletDir
-                             22 	.globl _bulletLive
-                             23 	.globl _bulletY
-                             24 	.globl _bulletX
-                             25 	.globl _randomBkgTiles
-                             26 	.globl _lastKeys
-                             27 	.globl _eY
-                             28 	.globl _eX
-                             29 	.globl _playerDir
-                             30 	.globl _playerY
-                             31 	.globl _playerX
-                             32 	.globl _j
-                             33 	.globl _i
-                             34 	.globl _myBkgData
-                             35 	.globl _sprites
-                             36 	.globl _initGame
-                             37 	.globl _updatePlayer
-                             38 	.globl _collisionCheck
-                             39 ;--------------------------------------------------------
-                             40 ; ram data
-                             41 ;--------------------------------------------------------
-                             42 	.area _DATA
-   0000                      43 _i::
-   0000                      44 	.ds 1
-   0001                      45 _j::
-   0001                      46 	.ds 1
-   0002                      47 _playerX::
-   0002                      48 	.ds 1
-   0003                      49 _playerY::
-   0003                      50 	.ds 1
-   0004                      51 _playerDir::
-   0004                      52 	.ds 1
-   0005                      53 _eX::
-   0005                      54 	.ds 10
-   000F                      55 _eY::
-   000F                      56 	.ds 10
-   0019                      57 _lastKeys::
-   0019                      58 	.ds 1
-   001A                      59 _randomBkgTiles::
-   001A                      60 	.ds 20
-   002E                      61 _bulletX::
-   002E                      62 	.ds 1
-   002F                      63 _bulletY::
-   002F                      64 	.ds 1
-   0030                      65 _bulletLive::
-   0030                      66 	.ds 1
-   0031                      67 _bulletDir::
-   0031                      68 	.ds 1
-   0032                      69 _shooting::
-   0032                      70 	.ds 1
-                             71 ;--------------------------------------------------------
-                             72 ; absolute external ram data
-                             73 ;--------------------------------------------------------
-                             74 	.area _DABS (ABS)
-                             75 ;--------------------------------------------------------
-                             76 ; global & static initialisations
-                             77 ;--------------------------------------------------------
-                             78 	.area _HOME
-                             79 	.area _GSINIT
-                             80 	.area _GSFINAL
-                             81 	.area _GSINIT
-                             82 ;--------------------------------------------------------
-                             83 ; Home
-                             84 ;--------------------------------------------------------
-                             85 	.area _HOME
-                             86 	.area _HOME
+                             20 	.globl _bullets
+                             21 	.globl _shooting
+                             22 	.globl _bulletDir
+                             23 	.globl _bulletLive
+                             24 	.globl _bulletY
+                             25 	.globl _bulletX
+                             26 	.globl _randomBkgTiles
+                             27 	.globl _lastKeys
+                             28 	.globl _eY
+                             29 	.globl _eX
+                             30 	.globl _playerDir
+                             31 	.globl _playerY
+                             32 	.globl _playerX
+                             33 	.globl _j
+                             34 	.globl _i
+                             35 	.globl _myBkgData
+                             36 	.globl _sprites
+                             37 	.globl _initGame
+                             38 	.globl _updatePlayer
+                             39 	.globl _collisionCheck
+                             40 ;--------------------------------------------------------
+                             41 ; ram data
+                             42 ;--------------------------------------------------------
+                             43 	.area _DATA
+   0000                      44 _i::
+   0000                      45 	.ds 1
+   0001                      46 _j::
+   0001                      47 	.ds 1
+   0002                      48 _playerX::
+   0002                      49 	.ds 1
+   0003                      50 _playerY::
+   0003                      51 	.ds 1
+   0004                      52 _playerDir::
+   0004                      53 	.ds 1
+   0005                      54 _eX::
+   0005                      55 	.ds 10
+   000F                      56 _eY::
+   000F                      57 	.ds 10
+   0019                      58 _lastKeys::
+   0019                      59 	.ds 1
+   001A                      60 _randomBkgTiles::
+   001A                      61 	.ds 20
+   002E                      62 _bulletX::
+   002E                      63 	.ds 1
+   002F                      64 _bulletY::
+   002F                      65 	.ds 1
+   0030                      66 _bulletLive::
+   0030                      67 	.ds 1
+   0031                      68 _bulletDir::
+   0031                      69 	.ds 1
+   0032                      70 _shooting::
+   0032                      71 	.ds 1
+   0033                      72 _bullets::
+   0033                      73 	.ds 4
+                             74 ;--------------------------------------------------------
+                             75 ; absolute external ram data
+                             76 ;--------------------------------------------------------
+                             77 	.area _DABS (ABS)
+                             78 ;--------------------------------------------------------
+                             79 ; global & static initialisations
+                             80 ;--------------------------------------------------------
+                             81 	.area _HOME
+                             82 	.area _GSINIT
+                             83 	.area _GSFINAL
+                             84 	.area _GSINIT
+                             85 ;--------------------------------------------------------
+                             86 ; Home
                              87 ;--------------------------------------------------------
-                             88 ; code
-                             89 ;--------------------------------------------------------
-                             90 	.area _CODE
-                             91 ;shooting.c:24: void main() {
-                             92 ;	---------------------------------
-                             93 ; Function main
-                             94 ; ---------------------------------
-   0000                      95 _main::
-                             96 ;shooting.c:26: initGame();
-   0000 CDr6Fr01             97 	call	_initGame
-                             98 ;shooting.c:28: while(1) {
-   0003                      99 00102$:
-                            100 ;shooting.c:29: updatePlayer(); // update player position
-   0003 CDrA3r02            101 	call	_updatePlayer
-                            102 ;shooting.c:30: HIDE_WIN; // Hide window layer - no windows used
-   0006 11 40 FF            103 	ld	de,#0xff40
-   0009 1A                  104 	ld	a,(de)
-   000A 4F                  105 	ld	c,a
-   000B 06 00               106 	ld	b,#0x00
-   000D CB A9               107 	res	5, c
-   000F 06 00               108 	ld	b,#0x00
-   0011 21 40 FF            109 	ld	hl,#0xff40
-   0014 71                  110 	ld	(hl),c
-                            111 ;shooting.c:31: SHOW_SPRITES; // Show sprites layer
-   0015 11 40 FF            112 	ld	de,#0xff40
-   0018 1A                  113 	ld	a,(de)
-   0019 4F                  114 	ld	c,a
-   001A 06 00               115 	ld	b,#0x00
-   001C 79                  116 	ld	a,c
-   001D CB CF               117 	set	1, a
-   001F 4F                  118 	ld	c,a
-   0020 2E 40               119 	ld	l, #0x40
-   0022 71                  120 	ld	(hl),c
-                            121 ;shooting.c:32: SHOW_BKG; // Show background layer
-   0023 11 40 FF            122 	ld	de,#0xff40
-   0026 1A                  123 	ld	a,(de)
-   0027 4F                  124 	ld	c,a
-   0028 06 00               125 	ld	b,#0x00
-   002A 79                  126 	ld	a,c
-   002B CB C7               127 	set	0, a
-   002D 4F                  128 	ld	c,a
-   002E 2E 40               129 	ld	l, #0x40
-   0030 71                  130 	ld	(hl),c
-                            131 ;shooting.c:33: lastKeys = joypad(); // Update keypresses
-   0031 CDr00r00            132 	call	_joypad
-   0034 21r19r00            133 	ld	hl,#_lastKeys
-   0037 73                  134 	ld	(hl),e
-                            135 ;shooting.c:34: wait_vbl_done(); // Wait for vblank to finish - ensures a 60fps max
-   0038 CDr00r00            136 	call	_wait_vbl_done
-   003B C3r03r00            137 	jp	00102$
-   003E C9                  138 	ret
-   003F                     139 _sprites:
-   003F FF                  140 	.db #0xff	; 255
-   0040 FF                  141 	.db #0xff	; 255
-   0041 81                  142 	.db #0x81	; 129
-   0042 81                  143 	.db #0x81	; 129
-   0043 A5                  144 	.db #0xa5	; 165
-   0044 A5                  145 	.db #0xa5	; 165
-   0045 A5                  146 	.db #0xa5	; 165
-   0046 A5                  147 	.db #0xa5	; 165
-   0047 81                  148 	.db #0x81	; 129
-   0048 81                  149 	.db #0x81	; 129
-   0049 99                  150 	.db #0x99	; 153
-   004A 99                  151 	.db #0x99	; 153
-   004B 81                  152 	.db #0x81	; 129
-   004C 81                  153 	.db #0x81	; 129
-   004D FF                  154 	.db #0xff	; 255
-   004E FF                  155 	.db #0xff	; 255
-   004F 3C                  156 	.db #0x3c	; 60
-   0050 3C                  157 	.db #0x3c	; 60
-   0051 42                  158 	.db #0x42	; 66	'B'
-   0052 42                  159 	.db #0x42	; 66	'B'
-   0053 81                  160 	.db #0x81	; 129
-   0054 81                  161 	.db #0x81	; 129
-   0055 ED                  162 	.db #0xed	; 237
-   0056 ED                  163 	.db #0xed	; 237
-   0057 81                  164 	.db #0x81	; 129
-   0058 81                  165 	.db #0x81	; 129
-   0059 91                  166 	.db #0x91	; 145
-   005A 91                  167 	.db #0x91	; 145
-   005B 42                  168 	.db #0x42	; 66	'B'
-   005C 42                  169 	.db #0x42	; 66	'B'
-   005D 3C                  170 	.db #0x3c	; 60
-   005E 3C                  171 	.db #0x3c	; 60
-   005F 99                  172 	.db #0x99	; 153
-   0060 81                  173 	.db #0x81	; 129
-   0061 42                  174 	.db #0x42	; 66	'B'
-   0062 5A                  175 	.db #0x5a	; 90	'Z'
-   0063 24                  176 	.db #0x24	; 36
-   0064 3C                  177 	.db #0x3c	; 60
-   0065 99                  178 	.db #0x99	; 153
-   0066 7E                  179 	.db #0x7e	; 126
-   0067 99                  180 	.db #0x99	; 153
-   0068 7E                  181 	.db #0x7e	; 126
-   0069 24                  182 	.db #0x24	; 36
-   006A 3C                  183 	.db #0x3c	; 60
-   006B 42                  184 	.db #0x42	; 66	'B'
-   006C 5A                  185 	.db #0x5a	; 90	'Z'
-   006D 99                  186 	.db #0x99	; 153
-   006E 81                  187 	.db #0x81	; 129
-   006F 38                  188 	.db #0x38	; 56	'8'
-   0070 04                  189 	.db #0x04	; 4
-   0071 7C                  190 	.db #0x7c	; 124
-   0072 02                  191 	.db #0x02	; 2
-   0073 5C                  192 	.db #0x5c	; 92
-   0074 22                  193 	.db #0x22	; 34
-   0075 5C                  194 	.db #0x5c	; 92
-   0076 22                  195 	.db #0x22	; 34
-   0077 5C                  196 	.db #0x5c	; 92
-   0078 22                  197 	.db #0x22	; 34
-   0079 5C                  198 	.db #0x5c	; 92
-   007A 22                  199 	.db #0x22	; 34
-   007B 7C                  200 	.db #0x7c	; 124
-   007C 02                  201 	.db #0x02	; 2
-   007D 38                  202 	.db #0x38	; 56	'8'
-   007E 04                  203 	.db #0x04	; 4
-   007F 00                  204 	.db #0x00	; 0
-   0080 00                  205 	.db #0x00	; 0
-   0081 3E                  206 	.db #0x3e	; 62
-   0082 3E                  207 	.db #0x3e	; 62
-   0083 63                  208 	.db #0x63	; 99	'c'
-   0084 63                  209 	.db #0x63	; 99	'c'
-   0085 63                  210 	.db #0x63	; 99	'c'
-   0086 63                  211 	.db #0x63	; 99	'c'
-   0087 63                  212 	.db #0x63	; 99	'c'
-   0088 63                  213 	.db #0x63	; 99	'c'
-   0089 63                  214 	.db #0x63	; 99	'c'
-   008A 63                  215 	.db #0x63	; 99	'c'
-   008B 3E                  216 	.db #0x3e	; 62
-   008C 3E                  217 	.db #0x3e	; 62
-   008D 00                  218 	.db #0x00	; 0
-   008E 00                  219 	.db #0x00	; 0
-   008F 00                  220 	.db #0x00	; 0
-   0090 00                  221 	.db #0x00	; 0
-   0091 1C                  222 	.db #0x1c	; 28
-   0092 1C                  223 	.db #0x1c	; 28
-   0093 3C                  224 	.db #0x3c	; 60
-   0094 3C                  225 	.db #0x3c	; 60
-   0095 6C                  226 	.db #0x6c	; 108	'l'
-   0096 6C                  227 	.db #0x6c	; 108	'l'
-   0097 0C                  228 	.db #0x0c	; 12
-   0098 0C                  229 	.db #0x0c	; 12
-   0099 0C                  230 	.db #0x0c	; 12
-   009A 0C                  231 	.db #0x0c	; 12
-   009B 7F                  232 	.db #0x7f	; 127
-   009C 7F                  233 	.db #0x7f	; 127
-   009D 00                  234 	.db #0x00	; 0
-   009E 00                  235 	.db #0x00	; 0
-   009F 00                  236 	.db #0x00	; 0
-   00A0 00                  237 	.db #0x00	; 0
-   00A1 3E                  238 	.db #0x3e	; 62
-   00A2 3E                  239 	.db #0x3e	; 62
-   00A3 63                  240 	.db #0x63	; 99	'c'
-   00A4 63                  241 	.db #0x63	; 99	'c'
-   00A5 03                  242 	.db #0x03	; 3
-   00A6 03                  243 	.db #0x03	; 3
-   00A7 1E                  244 	.db #0x1e	; 30
-   00A8 1E                  245 	.db #0x1e	; 30
-   00A9 70                  246 	.db #0x70	; 112	'p'
-   00AA 70                  247 	.db #0x70	; 112	'p'
-   00AB 7F                  248 	.db #0x7f	; 127
-   00AC 7F                  249 	.db #0x7f	; 127
-   00AD 00                  250 	.db #0x00	; 0
-   00AE 00                  251 	.db #0x00	; 0
-   00AF 00                  252 	.db #0x00	; 0
-   00B0 00                  253 	.db #0x00	; 0
-   00B1 7F                  254 	.db #0x7f	; 127
-   00B2 7F                  255 	.db #0x7f	; 127
-   00B3 03                  256 	.db #0x03	; 3
-   00B4 03                  257 	.db #0x03	; 3
-   00B5 3E                  258 	.db #0x3e	; 62
-   00B6 3E                  259 	.db #0x3e	; 62
-   00B7 07                  260 	.db #0x07	; 7
-   00B8 07                  261 	.db #0x07	; 7
-   00B9 43                  262 	.db #0x43	; 67	'C'
-   00BA 43                  263 	.db #0x43	; 67	'C'
-   00BB 3E                  264 	.db #0x3e	; 62
-   00BC 3E                  265 	.db #0x3e	; 62
-   00BD 00                  266 	.db #0x00	; 0
-   00BE 00                  267 	.db #0x00	; 0
-   00BF 00                  268 	.db #0x00	; 0
-   00C0 00                  269 	.db #0x00	; 0
-   00C1 60                  270 	.db #0x60	; 96
-   00C2 60                  271 	.db #0x60	; 96
-   00C3 6C                  272 	.db #0x6c	; 108	'l'
-   00C4 6C                  273 	.db #0x6c	; 108	'l'
-   00C5 6C                  274 	.db #0x6c	; 108	'l'
-   00C6 6C                  275 	.db #0x6c	; 108	'l'
-   00C7 7F                  276 	.db #0x7f	; 127
-   00C8 7F                  277 	.db #0x7f	; 127
-   00C9 0C                  278 	.db #0x0c	; 12
-   00CA 0C                  279 	.db #0x0c	; 12
-   00CB 0C                  280 	.db #0x0c	; 12
-   00CC 0C                  281 	.db #0x0c	; 12
-   00CD 00                  282 	.db #0x00	; 0
-   00CE 00                  283 	.db #0x00	; 0
-   00CF 00                  284 	.db #0x00	; 0
-   00D0 00                  285 	.db #0x00	; 0
-   00D1 7F                  286 	.db #0x7f	; 127
-   00D2 7F                  287 	.db #0x7f	; 127
-   00D3 60                  288 	.db #0x60	; 96
-   00D4 60                  289 	.db #0x60	; 96
-   00D5 7E                  290 	.db #0x7e	; 126
-   00D6 7E                  291 	.db #0x7e	; 126
-   00D7 03                  292 	.db #0x03	; 3
-   00D8 03                  293 	.db #0x03	; 3
-   00D9 63                  294 	.db #0x63	; 99	'c'
-   00DA 63                  295 	.db #0x63	; 99	'c'
-   00DB 3E                  296 	.db #0x3e	; 62
-   00DC 3E                  297 	.db #0x3e	; 62
-   00DD 00                  298 	.db #0x00	; 0
-   00DE 00                  299 	.db #0x00	; 0
-   00DF 00                  300 	.db #0x00	; 0
-   00E0 00                  301 	.db #0x00	; 0
-   00E1 3F                  302 	.db #0x3f	; 63
-   00E2 3F                  303 	.db #0x3f	; 63
-   00E3 60                  304 	.db #0x60	; 96
-   00E4 60                  305 	.db #0x60	; 96
-   00E5 7E                  306 	.db #0x7e	; 126
-   00E6 7E                  307 	.db #0x7e	; 126
-   00E7 63                  308 	.db #0x63	; 99	'c'
-   00E8 63                  309 	.db #0x63	; 99	'c'
-   00E9 63                  310 	.db #0x63	; 99	'c'
-   00EA 63                  311 	.db #0x63	; 99	'c'
-   00EB 3E                  312 	.db #0x3e	; 62
-   00EC 3E                  313 	.db #0x3e	; 62
-   00ED 00                  314 	.db #0x00	; 0
-   00EE 00                  315 	.db #0x00	; 0
-   00EF 00                  316 	.db #0x00	; 0
-   00F0 00                  317 	.db #0x00	; 0
-   00F1 7F                  318 	.db #0x7f	; 127
-   00F2 7F                  319 	.db #0x7f	; 127
-   00F3 03                  320 	.db #0x03	; 3
-   00F4 03                  321 	.db #0x03	; 3
-   00F5 06                  322 	.db #0x06	; 6
-   00F6 06                  323 	.db #0x06	; 6
-   00F7 0C                  324 	.db #0x0c	; 12
-   00F8 0C                  325 	.db #0x0c	; 12
-   00F9 18                  326 	.db #0x18	; 24
-   00FA 18                  327 	.db #0x18	; 24
-   00FB 30                  328 	.db #0x30	; 48	'0'
-   00FC 30                  329 	.db #0x30	; 48	'0'
-   00FD 00                  330 	.db #0x00	; 0
-   00FE 00                  331 	.db #0x00	; 0
-   00FF 00                  332 	.db #0x00	; 0
-   0100 00                  333 	.db #0x00	; 0
-   0101 3E                  334 	.db #0x3e	; 62
-   0102 3E                  335 	.db #0x3e	; 62
-   0103 63                  336 	.db #0x63	; 99	'c'
-   0104 63                  337 	.db #0x63	; 99	'c'
-   0105 63                  338 	.db #0x63	; 99	'c'
-   0106 63                  339 	.db #0x63	; 99	'c'
-   0107 3E                  340 	.db #0x3e	; 62
-   0108 3E                  341 	.db #0x3e	; 62
-   0109 63                  342 	.db #0x63	; 99	'c'
-   010A 63                  343 	.db #0x63	; 99	'c'
-   010B 3E                  344 	.db #0x3e	; 62
-   010C 3E                  345 	.db #0x3e	; 62
-   010D 00                  346 	.db #0x00	; 0
-   010E 00                  347 	.db #0x00	; 0
-   010F 00                  348 	.db #0x00	; 0
-   0110 00                  349 	.db #0x00	; 0
-   0111 3E                  350 	.db #0x3e	; 62
-   0112 3E                  351 	.db #0x3e	; 62
-   0113 63                  352 	.db #0x63	; 99	'c'
-   0114 63                  353 	.db #0x63	; 99	'c'
-   0115 63                  354 	.db #0x63	; 99	'c'
-   0116 63                  355 	.db #0x63	; 99	'c'
-   0117 3F                  356 	.db #0x3f	; 63
-   0118 3F                  357 	.db #0x3f	; 63
-   0119 03                  358 	.db #0x03	; 3
-   011A 03                  359 	.db #0x03	; 3
-   011B 7E                  360 	.db #0x7e	; 126
-   011C 7E                  361 	.db #0x7e	; 126
-   011D 00                  362 	.db #0x00	; 0
-   011E 00                  363 	.db #0x00	; 0
-   011F                     364 _myBkgData:
-   011F 00                  365 	.db #0x00	; 0
-   0120 00                  366 	.db #0x00	; 0
-   0121 00                  367 	.db #0x00	; 0
-   0122 00                  368 	.db #0x00	; 0
-   0123 00                  369 	.db #0x00	; 0
-   0124 00                  370 	.db #0x00	; 0
-   0125 00                  371 	.db #0x00	; 0
-   0126 00                  372 	.db #0x00	; 0
-   0127 00                  373 	.db #0x00	; 0
-   0128 00                  374 	.db #0x00	; 0
-   0129 00                  375 	.db #0x00	; 0
-   012A 00                  376 	.db #0x00	; 0
-   012B 00                  377 	.db #0x00	; 0
-   012C 00                  378 	.db #0x00	; 0
-   012D 00                  379 	.db #0x00	; 0
-   012E 00                  380 	.db #0x00	; 0
-   012F 00                  381 	.db #0x00	; 0
-   0130 00                  382 	.db #0x00	; 0
-   0131 08                  383 	.db #0x08	; 8
-   0132 00                  384 	.db #0x00	; 0
-   0133 08                  385 	.db #0x08	; 8
-   0134 00                  386 	.db #0x00	; 0
-   0135 36                  387 	.db #0x36	; 54	'6'
-   0136 00                  388 	.db #0x00	; 0
-   0137 08                  389 	.db #0x08	; 8
-   0138 00                  390 	.db #0x00	; 0
-   0139 08                  391 	.db #0x08	; 8
-   013A 00                  392 	.db #0x00	; 0
-   013B 00                  393 	.db #0x00	; 0
-   013C 00                  394 	.db #0x00	; 0
-   013D 00                  395 	.db #0x00	; 0
-   013E 00                  396 	.db #0x00	; 0
-   013F 00                  397 	.db #0x00	; 0
-   0140 00                  398 	.db #0x00	; 0
-   0141 00                  399 	.db #0x00	; 0
-   0142 00                  400 	.db #0x00	; 0
-   0143 20                  401 	.db #0x20	; 32
-   0144 00                  402 	.db #0x00	; 0
-   0145 50                  403 	.db #0x50	; 80	'P'
-   0146 00                  404 	.db #0x00	; 0
-   0147 20                  405 	.db #0x20	; 32
-   0148 00                  406 	.db #0x00	; 0
-   0149 00                  407 	.db #0x00	; 0
-   014A 00                  408 	.db #0x00	; 0
-   014B 00                  409 	.db #0x00	; 0
-   014C 00                  410 	.db #0x00	; 0
-   014D 00                  411 	.db #0x00	; 0
-   014E 00                  412 	.db #0x00	; 0
-   014F 00                  413 	.db #0x00	; 0
-   0150 00                  414 	.db #0x00	; 0
-   0151 00                  415 	.db #0x00	; 0
-   0152 00                  416 	.db #0x00	; 0
-   0153 00                  417 	.db #0x00	; 0
-   0154 00                  418 	.db #0x00	; 0
-   0155 00                  419 	.db #0x00	; 0
-   0156 00                  420 	.db #0x00	; 0
-   0157 00                  421 	.db #0x00	; 0
-   0158 00                  422 	.db #0x00	; 0
-   0159 04                  423 	.db #0x04	; 4
-   015A 00                  424 	.db #0x00	; 0
-   015B 0E                  425 	.db #0x0e	; 14
-   015C 00                  426 	.db #0x00	; 0
-   015D 04                  427 	.db #0x04	; 4
-   015E 00                  428 	.db #0x00	; 0
-   015F 00                  429 	.db #0x00	; 0
-   0160 00                  430 	.db #0x00	; 0
-   0161 00                  431 	.db #0x00	; 0
-   0162 00                  432 	.db #0x00	; 0
-   0163 00                  433 	.db #0x00	; 0
-   0164 00                  434 	.db #0x00	; 0
-   0165 00                  435 	.db #0x00	; 0
-   0166 00                  436 	.db #0x00	; 0
-   0167 50                  437 	.db #0x50	; 80	'P'
-   0168 00                  438 	.db #0x00	; 0
-   0169 20                  439 	.db #0x20	; 32
-   016A 00                  440 	.db #0x00	; 0
-   016B 50                  441 	.db #0x50	; 80	'P'
-   016C 00                  442 	.db #0x00	; 0
-   016D 00                  443 	.db #0x00	; 0
-   016E 00                  444 	.db #0x00	; 0
-                            445 ;shooting.c:38: void initGame(){
-                            446 ;	---------------------------------
-                            447 ; Function initGame
-                            448 ; ---------------------------------
-   016F                     449 _initGame::
-   016F 3B                  450 	dec	sp
-                            451 ;shooting.c:39: DISPLAY_ON; // turns on gameboy lcd
-   0170 11 40 FF            452 	ld	de,#0xff40
-   0173 1A                  453 	ld	a,(de)
-   0174 4F                  454 	ld	c,a
-   0175 06 00               455 	ld	b,#0x00
-   0177 79                  456 	ld	a,c
-   0178 CB FF               457 	set	7, a
-   017A 4F                  458 	ld	c,a
-   017B 21 40 FF            459 	ld	hl,#0xff40
-   017E 71                  460 	ld	(hl),c
-                            461 ;shooting.c:40: NR52_REG = 0x8F; // sound on
-   017F 2E 26               462 	ld	l, #0x26
-   0181 36 8F               463 	ld	(hl),#0x8f
-                            464 ;shooting.c:41: NR51_REG = 0x11; // both sound channels
-   0183 2E 25               465 	ld	l, #0x25
-   0185 36 11               466 	ld	(hl),#0x11
-                            467 ;shooting.c:42: NR50_REG = 0x77; // volume level, max = 0x77, min = 0x00
-   0187 2E 24               468 	ld	l, #0x24
-   0189 36 77               469 	ld	(hl),#0x77
-                            470 ;shooting.c:44: initrand(DIV_REG); // part of gb/rand.h, want to use DIV_REG as per the documentation
-   018B 11 04 FF            471 	ld	de,#0xff04
-   018E 1A                  472 	ld	a,(de)
-   018F 4F                  473 	ld	c,a
-   0190 06 00               474 	ld	b,#0x00
-   0192 C5                  475 	push	bc
-   0193 CDr00r00            476 	call	_initrand
-   0196 E8 02               477 	add	sp, #2
-                            478 ;shooting.c:45: set_sprite_data(0, 14, sprites); // storing sprite data
-   0198 21r3Fr00            479 	ld	hl,#_sprites
-   019B E5                  480 	push	hl
-   019C 21 00 0E            481 	ld	hl,#0x0e00
-   019F E5                  482 	push	hl
-   01A0 CDr00r00            483 	call	_set_sprite_data
-   01A3 E8 04               484 	add	sp, #4
-                            485 ;shooting.c:46: set_bkg_data(0, 4, myBkgData); // storing background data - window layer shares this
-   01A5 21r1Fr01            486 	ld	hl,#_myBkgData
-   01A8 E5                  487 	push	hl
-   01A9 21 00 04            488 	ld	hl,#0x0400
-   01AC E5                  489 	push	hl
-   01AD CDr00r00            490 	call	_set_bkg_data
-   01B0 E8 04               491 	add	sp, #4
-                            492 ;shooting.c:48: playerX = 64; // initial x position for player
-   01B2 21r02r00            493 	ld	hl,#_playerX
-   01B5 36 40               494 	ld	(hl),#0x40
-                            495 ;shooting.c:49: playerY = 64; // initial y position for player
-   01B7 21r03r00            496 	ld	hl,#_playerY
-   01BA 36 40               497 	ld	(hl),#0x40
-                            498 ;shooting.c:51: set_sprite_tile(0,0); // sprite tile representing the player - is first sprite, so 0th index
-   01BC 21 00 00            499 	ld	hl,#0x0000
-   01BF E5                  500 	push	hl
-   01C0 CDr00r00            501 	call	_set_sprite_tile
-   01C3 E8 02               502 	add	sp, #2
-                            503 ;shooting.c:54: for (i=0; i !=10; i++) {
-   01C5 21r00r00            504 	ld	hl,#_i
-   01C8 36 00               505 	ld	(hl),#0x00
-   01CA                     506 00104$:
-                            507 ;shooting.c:55: eX[i] = 16+(rand()); // random x position between 16 and 144
-   01CA 3Er05               508 	ld	a,#<(_eX)
-   01CC 21r00r00            509 	ld	hl,#_i
-   01CF 86                  510 	add	a, (hl)
-   01D0 4F                  511 	ld	c,a
-   01D1 3Es00               512 	ld	a,#>(_eX)
-   01D3 CE 00               513 	adc	a, #0x00
-   01D5 47                  514 	ld	b,a
-   01D6 C5                  515 	push	bc
-   01D7 CDr00r00            516 	call	_rand
-   01DA C1                  517 	pop	bc
-   01DB 7B                  518 	ld	a,e
-   01DC C6 10               519 	add	a, #0x10
-   01DE 02                  520 	ld	(bc),a
-                            521 ;shooting.c:56: eY[i] = 16+(rand()); // random y position between 16 and 144
-   01DF 3Er0F               522 	ld	a,#<(_eY)
-   01E1 21r00r00            523 	ld	hl,#_i
-   01E4 86                  524 	add	a, (hl)
-   01E5 4F                  525 	ld	c,a
-   01E6 3Es00               526 	ld	a,#>(_eY)
-   01E8 CE 00               527 	adc	a, #0x00
-   01EA 47                  528 	ld	b,a
-   01EB C5                  529 	push	bc
-   01EC CDr00r00            530 	call	_rand
-   01EF C1                  531 	pop	bc
-   01F0 7B                  532 	ld	a,e
-   01F1 C6 10               533 	add	a, #0x10
-   01F3 02                  534 	ld	(bc),a
-                            535 ;shooting.c:57: set_sprite_tile(i+1, 2); // enemy sprite tile set to 2
-   01F4 21r00r00            536 	ld	hl,#_i
-   01F7 46                  537 	ld	b,(hl)
-   01F8 04                  538 	inc	b
-   01F9 3E 02               539 	ld	a,#0x02
-   01FB F5                  540 	push	af
-   01FC 33                  541 	inc	sp
-   01FD C5                  542 	push	bc
-   01FE 33                  543 	inc	sp
-   01FF CDr00r00            544 	call	_set_sprite_tile
-   0202 E8 02               545 	add	sp, #2
-                            546 ;shooting.c:58: move_sprite(i+1,eX[i], eY[i]); // place enemies
-   0204 3Er0F               547 	ld	a,#<(_eY)
-   0206 21r00r00            548 	ld	hl,#_i
-   0209 86                  549 	add	a, (hl)
-   020A 4F                  550 	ld	c,a
-   020B 3Es00               551 	ld	a,#>(_eY)
-   020D CE 00               552 	adc	a, #0x00
-   020F 47                  553 	ld	b,a
-   0210 0A                  554 	ld	a,(bc)
-   0211 F8 00               555 	ldhl	sp,#0
-   0213 77                  556 	ld	(hl),a
-   0214 3Er05               557 	ld	a,#<(_eX)
-   0216 21r00r00            558 	ld	hl,#_i
-   0219 86                  559 	add	a, (hl)
-   021A 4F                  560 	ld	c,a
-   021B 3Es00               561 	ld	a,#>(_eX)
-   021D CE 00               562 	adc	a, #0x00
-   021F 47                  563 	ld	b,a
-   0220 0A                  564 	ld	a,(bc)
-   0221 57                  565 	ld	d,a
-   0222 46                  566 	ld	b,(hl)
-   0223 04                  567 	inc	b
-   0224 F8 00               568 	ldhl	sp,#0
-   0226 7E                  569 	ld	a,(hl)
-   0227 F5                  570 	push	af
-   0228 33                  571 	inc	sp
-   0229 D5                  572 	push	de
-   022A 33                  573 	inc	sp
-   022B C5                  574 	push	bc
-   022C 33                  575 	inc	sp
-   022D CDr00r00            576 	call	_move_sprite
-   0230 E8 03               577 	add	sp, #3
-                            578 ;shooting.c:54: for (i=0; i !=10; i++) {
-   0232 21r00r00            579 	ld	hl,#_i
-   0235 34                  580 	inc	(hl)
-   0236 7E                  581 	ld	a,(hl)
-   0237 D6 0A               582 	sub	a, #0x0a
-   0239 C2rCAr01            583 	jp	NZ,00104$
-                            584 ;shooting.c:61: bulletLive = 0;
-   023C 21r30r00            585 	ld	hl,#_bulletLive
-   023F 36 00               586 	ld	(hl),#0x00
-                            587 ;shooting.c:62: shooting = 0;
-   0241 21r32r00            588 	ld	hl,#_shooting
-   0244 36 00               589 	ld	(hl),#0x00
-                            590 ;shooting.c:63: set_sprite_tile(12, 3); // sets sprite tile 03 to index 12
-   0246 21 0C 03            591 	ld	hl,#0x030c
-   0249 E5                  592 	push	hl
-   024A CDr00r00            593 	call	_set_sprite_tile
-   024D E8 02               594 	add	sp, #2
-                            595 ;shooting.c:66: for (j=0; j != 18; j++) {
-   024F 21r01r00            596 	ld	hl,#_j
-   0252 36 00               597 	ld	(hl),#0x00
-   0254                     598 00108$:
-                            599 ;shooting.c:67: for (i=0; i != 20; i++) {
-   0254 21r00r00            600 	ld	hl,#_i
-   0257 36 00               601 	ld	(hl),#0x00
-   0259                     602 00106$:
-                            603 ;shooting.c:68: randomBkgTiles[i] = rand() % 4;
-   0259 3Er1A               604 	ld	a,#<(_randomBkgTiles)
-   025B 21r00r00            605 	ld	hl,#_i
-   025E 86                  606 	add	a, (hl)
-   025F 4F                  607 	ld	c,a
-   0260 3Es00               608 	ld	a,#>(_randomBkgTiles)
-   0262 CE 00               609 	adc	a, #0x00
-   0264 47                  610 	ld	b,a
-   0265 C5                  611 	push	bc
-   0266 CDr00r00            612 	call	_rand
-   0269 C1                  613 	pop	bc
-   026A C5                  614 	push	bc
-   026B 21 04 00            615 	ld	hl,#0x0004
-   026E E5                  616 	push	hl
-   026F D5                  617 	push	de
-   0270 CDr00r00            618 	call	__modsint
-   0273 E8 04               619 	add	sp, #4
-   0275 C1                  620 	pop	bc
-   0276 7B                  621 	ld	a,e
-   0277 02                  622 	ld	(bc),a
-                            623 ;shooting.c:67: for (i=0; i != 20; i++) {
-   0278 21r00r00            624 	ld	hl,#_i
-   027B 34                  625 	inc	(hl)
-   027C 7E                  626 	ld	a,(hl)
-   027D D6 14               627 	sub	a, #0x14
-   027F 20 D8               628 	jr	NZ,00106$
-                            629 ;shooting.c:70: set_bkg_tiles(0,j,20,1,randomBkgTiles); // x, y, width, height, background tiles
-   0281 21r1Ar00            630 	ld	hl,#_randomBkgTiles
-   0284 E5                  631 	push	hl
-   0285 21 14 01            632 	ld	hl,#0x0114
-   0288 E5                  633 	push	hl
-   0289 21r01r00            634 	ld	hl,#_j
-   028C 7E                  635 	ld	a,(hl)
-   028D F5                  636 	push	af
-   028E 33                  637 	inc	sp
-   028F AF                  638 	xor	a, a
-   0290 F5                  639 	push	af
-   0291 33                  640 	inc	sp
-   0292 CDr00r00            641 	call	_set_bkg_tiles
-   0295 E8 06               642 	add	sp, #6
-                            643 ;shooting.c:66: for (j=0; j != 18; j++) {
-   0297 21r01r00            644 	ld	hl,#_j
-   029A 34                  645 	inc	(hl)
-   029B 7E                  646 	ld	a,(hl)
-   029C D6 12               647 	sub	a, #0x12
-   029E C2r54r02            648 	jp	NZ,00108$
-   02A1 33                  649 	inc	sp
-   02A2 C9                  650 	ret
-                            651 ;shooting.c:75: void updatePlayer(){
-                            652 ;	---------------------------------
-                            653 ; Function updatePlayer
-                            654 ; ---------------------------------
-   02A3                     655 _updatePlayer::
-   02A3 E8 FE               656 	add	sp, #-2
-                            657 ;shooting.c:79: if (joypad() & J_UP) {
-   02A5 CDr00r00            658 	call	_joypad
-   02A8 0E 00               659 	ld	c,#0x00
-   02AA CB 53               660 	bit	2, e
-   02AC CAr22r03            661 	jp	Z,00112$
-                            662 ;shooting.c:80: playerY--;
-   02AF 21r03r00            663 	ld	hl,#_playerY
-   02B2 35                  664 	dec	(hl)
-                            665 ;shooting.c:82: shooting = 1;
-   02B3 21r32r00            666 	ld	hl,#_shooting
-   02B6 36 01               667 	ld	(hl),#0x01
-                            668 ;shooting.c:83: playerDir = 0;
-   02B8 21r04r00            669 	ld	hl,#_playerDir
-   02BB 36 00               670 	ld	(hl),#0x00
-                            671 ;shooting.c:85: if (bulletLive == 0) {
-   02BD 21r30r00            672 	ld	hl,#_bulletLive
-   02C0 7E                  673 	ld	a,(hl)
-   02C1 B7                  674 	or	a, a
-   02C2 C2r15r03            675 	jp	NZ,00108$
-                            676 ;shooting.c:86: bulletLive = 1;
-   02C5 36 01               677 	ld	(hl),#0x01
-                            678 ;shooting.c:88: if (joypad() & J_LEFT) {
-   02C7 CDr00r00            679 	call	_joypad
-   02CA 0E 00               680 	ld	c,#0x00
-   02CC CB 4B               681 	bit	1, e
-   02CE 28 07               682 	jr	Z,00105$
-                            683 ;shooting.c:89: bulletDir = 4;
-   02D0 21r31r00            684 	ld	hl,#_bulletDir
-   02D3 36 04               685 	ld	(hl),#0x04
-   02D5 18 15               686 	jr	00106$
-   02D7                     687 00105$:
-                            688 ;shooting.c:90: } else if (joypad() & J_RIGHT) {
-   02D7 CDr00r00            689 	call	_joypad
-   02DA 0E 00               690 	ld	c,#0x00
-   02DC CB 43               691 	bit	0, e
-   02DE 28 07               692 	jr	Z,00102$
-                            693 ;shooting.c:91: bulletDir = 5;
-   02E0 21r31r00            694 	ld	hl,#_bulletDir
-   02E3 36 05               695 	ld	(hl),#0x05
-   02E5 18 05               696 	jr	00106$
-   02E7                     697 00102$:
-                            698 ;shooting.c:93: bulletDir = 0;
-   02E7 21r31r00            699 	ld	hl,#_bulletDir
-   02EA 36 00               700 	ld	(hl),#0x00
-   02EC                     701 00106$:
-                            702 ;shooting.c:96: bulletX = playerX;
-   02EC E5                  703 	push	hl
-   02ED 21r02r00            704 	ld	hl,#_playerX
-   02F0 7E                  705 	ld	a,(hl)
-   02F1 21r2Er00            706 	ld	hl,#_bulletX
-   02F4 77                  707 	ld	(hl),a
-   02F5 E1                  708 	pop	hl
-                            709 ;shooting.c:97: bulletY = playerY;
-   02F6 E5                  710 	push	hl
-   02F7 21r03r00            711 	ld	hl,#_playerY
-   02FA 7E                  712 	ld	a,(hl)
-   02FB 21r2Fr00            713 	ld	hl,#_bulletY
-   02FE 77                  714 	ld	(hl),a
-   02FF E1                  715 	pop	hl
-                            716 ;shooting.c:98: move_sprite(12, bulletX, bulletY); // places sprite on screen
-   0300 21r2Fr00            717 	ld	hl,#_bulletY
-   0303 7E                  718 	ld	a,(hl)
-   0304 F5                  719 	push	af
-   0305 33                  720 	inc	sp
-   0306 21r2Er00            721 	ld	hl,#_bulletX
-   0309 7E                  722 	ld	a,(hl)
-   030A F5                  723 	push	af
-   030B 33                  724 	inc	sp
-   030C 3E 0C               725 	ld	a,#0x0c
-   030E F5                  726 	push	af
-   030F 33                  727 	inc	sp
-   0310 CDr00r00            728 	call	_move_sprite
-   0313 E8 03               729 	add	sp, #3
-   0315                     730 00108$:
-                            731 ;shooting.c:100: if (playerY == 15) {
-   0315 21r03r00            732 	ld	hl,#_playerY
-   0318 7E                  733 	ld	a,(hl)
-   0319 D6 0F               734 	sub	a, #0x0f
-   031B 20 05               735 	jr	NZ,00112$
-                            736 ;shooting.c:101: playerY = 16;
-   031D 21r03r00            737 	ld	hl,#_playerY
-   0320 36 10               738 	ld	(hl),#0x10
-   0322                     739 00112$:
-                            740 ;shooting.c:105: if (joypad() & J_DOWN){
-   0322 CDr00r00            741 	call	_joypad
-   0325 0E 00               742 	ld	c,#0x00
-   0327 CB 5B               743 	bit	3, e
-   0329 CAr9Fr03            744 	jp	Z,00124$
-                            745 ;shooting.c:106: playerY++;
-   032C 21r03r00            746 	ld	hl,#_playerY
-   032F 34                  747 	inc	(hl)
-                            748 ;shooting.c:108: shooting = 1;
-   0330 21r32r00            749 	ld	hl,#_shooting
-   0333 36 01               750 	ld	(hl),#0x01
-                            751 ;shooting.c:109: playerDir = 2;
-   0335 21r04r00            752 	ld	hl,#_playerDir
-   0338 36 02               753 	ld	(hl),#0x02
-                            754 ;shooting.c:111: if (bulletLive == 0) {
-   033A 21r30r00            755 	ld	hl,#_bulletLive
-   033D 7E                  756 	ld	a,(hl)
-   033E B7                  757 	or	a, a
-   033F C2r92r03            758 	jp	NZ,00120$
-                            759 ;shooting.c:112: bulletLive = 1;
-   0342 36 01               760 	ld	(hl),#0x01
-                            761 ;shooting.c:114: if (joypad() & J_LEFT) {
-   0344 CDr00r00            762 	call	_joypad
-   0347 0E 00               763 	ld	c,#0x00
-   0349 CB 4B               764 	bit	1, e
-   034B 28 07               765 	jr	Z,00117$
-                            766 ;shooting.c:115: bulletDir = 7;
-   034D 21r31r00            767 	ld	hl,#_bulletDir
-   0350 36 07               768 	ld	(hl),#0x07
-   0352 18 15               769 	jr	00118$
-   0354                     770 00117$:
-                            771 ;shooting.c:116: } else if (joypad() & J_RIGHT) {
-   0354 CDr00r00            772 	call	_joypad
-   0357 0E 00               773 	ld	c,#0x00
-   0359 CB 43               774 	bit	0, e
-   035B 28 07               775 	jr	Z,00114$
-                            776 ;shooting.c:117: bulletDir = 6;
-   035D 21r31r00            777 	ld	hl,#_bulletDir
-   0360 36 06               778 	ld	(hl),#0x06
-   0362 18 05               779 	jr	00118$
-   0364                     780 00114$:
-                            781 ;shooting.c:119: bulletDir = 2;
-   0364 21r31r00            782 	ld	hl,#_bulletDir
-   0367 36 02               783 	ld	(hl),#0x02
-   0369                     784 00118$:
-                            785 ;shooting.c:122: bulletX = playerX;
-   0369 E5                  786 	push	hl
-   036A 21r02r00            787 	ld	hl,#_playerX
-   036D 7E                  788 	ld	a,(hl)
-   036E 21r2Er00            789 	ld	hl,#_bulletX
-   0371 77                  790 	ld	(hl),a
-   0372 E1                  791 	pop	hl
-                            792 ;shooting.c:123: bulletY = playerY;
-   0373 E5                  793 	push	hl
-   0374 21r03r00            794 	ld	hl,#_playerY
-   0377 7E                  795 	ld	a,(hl)
-   0378 21r2Fr00            796 	ld	hl,#_bulletY
-   037B 77                  797 	ld	(hl),a
-   037C E1                  798 	pop	hl
-                            799 ;shooting.c:124: move_sprite(12, bulletX, bulletY); // places sprite on screen
-   037D 21r2Fr00            800 	ld	hl,#_bulletY
-   0380 7E                  801 	ld	a,(hl)
-   0381 F5                  802 	push	af
-   0382 33                  803 	inc	sp
-   0383 21r2Er00            804 	ld	hl,#_bulletX
-   0386 7E                  805 	ld	a,(hl)
-   0387 F5                  806 	push	af
-   0388 33                  807 	inc	sp
-   0389 3E 0C               808 	ld	a,#0x0c
-   038B F5                  809 	push	af
-   038C 33                  810 	inc	sp
-   038D CDr00r00            811 	call	_move_sprite
-   0390 E8 03               812 	add	sp, #3
-   0392                     813 00120$:
-                            814 ;shooting.c:126: if (playerY == 153){
-   0392 21r03r00            815 	ld	hl,#_playerY
-   0395 7E                  816 	ld	a,(hl)
-   0396 D6 99               817 	sub	a, #0x99
-   0398 20 05               818 	jr	NZ,00124$
-                            819 ;shooting.c:127: playerY = 152;
-   039A 21r03r00            820 	ld	hl,#_playerY
-   039D 36 98               821 	ld	(hl),#0x98
-   039F                     822 00124$:
-                            823 ;shooting.c:131: if (joypad() & J_LEFT){
-   039F CDr00r00            824 	call	_joypad
-   03A2 0E 00               825 	ld	c,#0x00
-   03A4 CB 4B               826 	bit	1, e
-   03A6 CArFBr03            827 	jp	Z,00130$
-                            828 ;shooting.c:132: playerX--;
-   03A9 21r02r00            829 	ld	hl,#_playerX
-   03AC 35                  830 	dec	(hl)
-                            831 ;shooting.c:134: shooting = 1;
-   03AD 21r32r00            832 	ld	hl,#_shooting
-   03B0 36 01               833 	ld	(hl),#0x01
-                            834 ;shooting.c:135: playerDir = 3;
-   03B2 21r04r00            835 	ld	hl,#_playerDir
-   03B5 36 03               836 	ld	(hl),#0x03
-                            837 ;shooting.c:137: if (bulletLive == 0) {
-   03B7 21r30r00            838 	ld	hl,#_bulletLive
-   03BA 7E                  839 	ld	a,(hl)
-   03BB B7                  840 	or	a, a
-   03BC 20 30               841 	jr	NZ,00126$
-                            842 ;shooting.c:138: bulletLive = 1;
-   03BE 36 01               843 	ld	(hl),#0x01
-                            844 ;shooting.c:139: bulletDir = 3;
-   03C0 21r31r00            845 	ld	hl,#_bulletDir
-   03C3 36 03               846 	ld	(hl),#0x03
-                            847 ;shooting.c:140: bulletX = playerX;
-   03C5 E5                  848 	push	hl
-   03C6 21r02r00            849 	ld	hl,#_playerX
-   03C9 7E                  850 	ld	a,(hl)
-   03CA 21r2Er00            851 	ld	hl,#_bulletX
-   03CD 77                  852 	ld	(hl),a
-   03CE E1                  853 	pop	hl
-                            854 ;shooting.c:141: bulletY = playerY;
-   03CF E5                  855 	push	hl
-   03D0 21r03r00            856 	ld	hl,#_playerY
-   03D3 7E                  857 	ld	a,(hl)
-   03D4 21r2Fr00            858 	ld	hl,#_bulletY
-   03D7 77                  859 	ld	(hl),a
-   03D8 E1                  860 	pop	hl
-                            861 ;shooting.c:142: move_sprite(12, bulletX, bulletY); // places sprite on screen
-   03D9 21r2Fr00            862 	ld	hl,#_bulletY
-   03DC 7E                  863 	ld	a,(hl)
-   03DD F5                  864 	push	af
-   03DE 33                  865 	inc	sp
-   03DF 21r2Er00            866 	ld	hl,#_bulletX
-   03E2 7E                  867 	ld	a,(hl)
-   03E3 F5                  868 	push	af
-   03E4 33                  869 	inc	sp
-   03E5 3E 0C               870 	ld	a,#0x0c
-   03E7 F5                  871 	push	af
-   03E8 33                  872 	inc	sp
-   03E9 CDr00r00            873 	call	_move_sprite
-   03EC E8 03               874 	add	sp, #3
-   03EE                     875 00126$:
-                            876 ;shooting.c:144: if (playerX == 7){
-   03EE 21r02r00            877 	ld	hl,#_playerX
-   03F1 7E                  878 	ld	a,(hl)
-   03F2 D6 07               879 	sub	a, #0x07
-   03F4 20 05               880 	jr	NZ,00130$
-                            881 ;shooting.c:145: playerX = 8;
-   03F6 21r02r00            882 	ld	hl,#_playerX
-   03F9 36 08               883 	ld	(hl),#0x08
-   03FB                     884 00130$:
-                            885 ;shooting.c:149: if (joypad() & J_RIGHT){
-   03FB CDr00r00            886 	call	_joypad
-   03FE 0E 00               887 	ld	c,#0x00
-   0400 CB 43               888 	bit	0, e
-   0402 CAr57r04            889 	jp	Z,00136$
-                            890 ;shooting.c:150: playerX++;
-   0405 21r02r00            891 	ld	hl,#_playerX
-   0408 34                  892 	inc	(hl)
-                            893 ;shooting.c:152: shooting = 1;
-   0409 21r32r00            894 	ld	hl,#_shooting
-   040C 36 01               895 	ld	(hl),#0x01
-                            896 ;shooting.c:153: playerDir = 1;
-   040E 21r04r00            897 	ld	hl,#_playerDir
-   0411 36 01               898 	ld	(hl),#0x01
-                            899 ;shooting.c:155: if (bulletLive == 0) {
-   0413 21r30r00            900 	ld	hl,#_bulletLive
-   0416 7E                  901 	ld	a,(hl)
-   0417 B7                  902 	or	a, a
-   0418 20 30               903 	jr	NZ,00132$
-                            904 ;shooting.c:156: bulletLive = 1;
-   041A 36 01               905 	ld	(hl),#0x01
-                            906 ;shooting.c:157: bulletDir = 1;
-   041C 21r31r00            907 	ld	hl,#_bulletDir
-   041F 36 01               908 	ld	(hl),#0x01
-                            909 ;shooting.c:158: bulletX = playerX;
-   0421 E5                  910 	push	hl
-   0422 21r02r00            911 	ld	hl,#_playerX
-   0425 7E                  912 	ld	a,(hl)
-   0426 21r2Er00            913 	ld	hl,#_bulletX
-   0429 77                  914 	ld	(hl),a
-   042A E1                  915 	pop	hl
-                            916 ;shooting.c:159: bulletY = playerY;
-   042B E5                  917 	push	hl
-   042C 21r03r00            918 	ld	hl,#_playerY
-   042F 7E                  919 	ld	a,(hl)
-   0430 21r2Fr00            920 	ld	hl,#_bulletY
-   0433 77                  921 	ld	(hl),a
-   0434 E1                  922 	pop	hl
-                            923 ;shooting.c:160: move_sprite(12, bulletX, bulletY); // places sprite on screen
-   0435 21r2Fr00            924 	ld	hl,#_bulletY
-   0438 7E                  925 	ld	a,(hl)
-   0439 F5                  926 	push	af
-   043A 33                  927 	inc	sp
-   043B 21r2Er00            928 	ld	hl,#_bulletX
-   043E 7E                  929 	ld	a,(hl)
-   043F F5                  930 	push	af
-   0440 33                  931 	inc	sp
-   0441 3E 0C               932 	ld	a,#0x0c
-   0443 F5                  933 	push	af
-   0444 33                  934 	inc	sp
-   0445 CDr00r00            935 	call	_move_sprite
-   0448 E8 03               936 	add	sp, #3
-   044A                     937 00132$:
-                            938 ;shooting.c:162: if (playerX == 161){
-   044A 21r02r00            939 	ld	hl,#_playerX
-   044D 7E                  940 	ld	a,(hl)
-   044E D6 A1               941 	sub	a, #0xa1
-   0450 20 05               942 	jr	NZ,00136$
-                            943 ;shooting.c:163: playerX = 160;
-   0452 21r02r00            944 	ld	hl,#_playerX
-   0455 36 A0               945 	ld	(hl),#0xa0
-   0457                     946 00136$:
-                            947 ;shooting.c:168: if (joypad() & J_A) {
-   0457 CDr00r00            948 	call	_joypad
-   045A 0E 00               949 	ld	c,#0x00
-   045C CB 63               950 	bit	4, e
-   045E 28 1F               951 	jr	Z,00141$
-                            952 ;shooting.c:169: NR11_REG = 0x7f; // audio channel #1, wave pattern duty
-   0460 21 11 FF            953 	ld	hl,#0xff11
-   0463 36 7F               954 	ld	(hl),#0x7f
-                            955 ;shooting.c:170: NR12_REG = 0x7f; // volume for 11
-   0465 2E 12               956 	ld	l, #0x12
-   0467 36 7F               957 	ld	(hl),#0x7f
-                            958 ;shooting.c:171: NR13_REG = DIV_REG; // sound frequency least significant bit
-   0469 11 04 FF            959 	ld	de,#0xff04
-   046C 1A                  960 	ld	a,(de)
-   046D 11 13 FF            961 	ld	de,#0xff13
-   0470 12                  962 	ld	(de),a
-                            963 ;shooting.c:172: NR14_REG = 0x80 + (DIV_REG % 8); // sound frequency significant 3 bits
-   0471 11 04 FF            964 	ld	de,#0xff04
-   0474 1A                  965 	ld	a,(de)
-   0475 E6 07               966 	and	a, #0x07
-   0477 C6 80               967 	add	a, #0x80
-   0479 11 14 FF            968 	ld	de,#0xff14
-   047C 12                  969 	ld	(de),a
-   047D 18 1F               970 	jr	00142$
-   047F                     971 00141$:
-                            972 ;shooting.c:173: } else if (joypad() & J_B) {
-   047F CDr00r00            973 	call	_joypad
-   0482 0E 00               974 	ld	c,#0x00
-   0484 CB 6B               975 	bit	5, e
-   0486 20 16               976 	jr	NZ,00142$
-                            977 ;shooting.c:177: NR11_REG = 0x00;
-   0488 21 11 FF            978 	ld	hl,#0xff11
-   048B 36 00               979 	ld	(hl),#0x00
-                            980 ;shooting.c:178: NR12_REG = 0x00;
-   048D 2E 12               981 	ld	l, #0x12
-   048F 36 00               982 	ld	(hl),#0x00
-                            983 ;shooting.c:179: NR13_REG = 0x00;
-   0491 2E 13               984 	ld	l, #0x13
-   0493 36 00               985 	ld	(hl),#0x00
-                            986 ;shooting.c:180: NR14_REG = 0x00;
-   0495 2E 14               987 	ld	l, #0x14
-   0497 36 00               988 	ld	(hl),#0x00
-                            989 ;shooting.c:182: shooting = 0;
-   0499 21r32r00            990 	ld	hl,#_shooting
-   049C 36 00               991 	ld	(hl),#0x00
-   049E                     992 00142$:
-                            993 ;shooting.c:185: move_sprite(0,playerX,playerY); // position player sprite on screen
-   049E 21r03r00            994 	ld	hl,#_playerY
-   04A1 7E                  995 	ld	a,(hl)
-   04A2 F5                  996 	push	af
-   04A3 33                  997 	inc	sp
-   04A4 21r02r00            998 	ld	hl,#_playerX
-   04A7 7E                  999 	ld	a,(hl)
-   04A8 F5                 1000 	push	af
-   04A9 33                 1001 	inc	sp
-   04AA AF                 1002 	xor	a, a
-   04AB F5                 1003 	push	af
-   04AC 33                 1004 	inc	sp
-   04AD CDr00r00           1005 	call	_move_sprite
-   04B0 E8 03              1006 	add	sp, #3
-                           1007 ;shooting.c:187: if (bulletX > 160 || bulletX == 0 || bulletY > 152 || bulletY == 0) {
-   04B2 3E A0              1008 	ld	a,#0xa0
-   04B4 21r2Er00           1009 	ld	hl,#_bulletX
-   04B7 96                 1010 	sub	a, (hl)
-   04B8 38 11              1011 	jr	C,00160$
-   04BA 7E                 1012 	ld	a,(hl)
-   04BB B7                 1013 	or	a, a
-   04BC 28 0D              1014 	jr	Z,00160$
-   04BE 3E 98              1015 	ld	a,#0x98
-   04C0 21r2Fr00           1016 	ld	hl,#_bulletY
-   04C3 96                 1017 	sub	a, (hl)
-   04C4 38 05              1018 	jr	C,00160$
-   04C6 7E                 1019 	ld	a,(hl)
-   04C7 B7                 1020 	or	a, a
-   04C8 C2r4Fr05           1021 	jp	NZ,00161$
-   04CB                    1022 00160$:
-                           1023 ;shooting.c:188: if (shooting == 1) {
-   04CB 21r32r00           1024 	ld	hl,#_shooting
-   04CE 7E                 1025 	ld	a,(hl)
-   04CF 3D                 1026 	dec	a
-   04D0 C2r3Dr05           1027 	jp	NZ,00149$
-                           1028 ;shooting.c:189: bulletLive = 1;
-   04D3 21r30r00           1029 	ld	hl,#_bulletLive
-   04D6 36 01              1030 	ld	(hl),#0x01
-                           1031 ;shooting.c:190: switch (playerDir) {
-   04D8 3E 03              1032 	ld	a,#0x03
-   04DA 21r04r00           1033 	ld	hl,#_playerDir
-   04DD 96                 1034 	sub	a, (hl)
-   04DE DArFBr05           1035 	jp	C,00162$
-                           1036 ;shooting.c:96: bulletX = playerX;
-   04E1 21r02r00           1037 	ld	hl,#_playerX
-   04E4 46                 1038 	ld	b,(hl)
-                           1039 ;shooting.c:97: bulletY = playerY;
-   04E5 21r03r00           1040 	ld	hl,#_playerY
-   04E8 4E                 1041 	ld	c,(hl)
-                           1042 ;shooting.c:193: bulletY = playerY - 8;
-   04E9 7E                 1043 	ld	a,(hl)
-   04EA C6 F8              1044 	add	a,#0xf8
-   04EC F8 00              1045 	ldhl	sp,#0
-   04EE 77                 1046 	ld	(hl),a
-                           1047 ;shooting.c:195: bulletX = playerX + 8;
-   04EF 21r02r00           1048 	ld	hl,#_playerX
-   04F2 7E                 1049 	ld	a,(hl)
-   04F3 C6 08              1050 	add	a, #0x08
-   04F5 5F                 1051 	ld	e,a
-                           1052 ;shooting.c:190: switch (playerDir) {
-   04F6 21r04r00           1053 	ld	hl,#_playerDir
-   04F9 5E                 1054 	ld	e,(hl)
-   04FA 16 00              1055 	ld	d,#0x00
-   04FC 21r02r05           1056 	ld	hl,#00309$
-   04FF 19                 1057 	add	hl,de
-   0500 19                 1058 	add	hl,de
-                           1059 ;shooting.c:191: case 0:
-   0501 E9                 1060 	jp	(hl)
-   0502                    1061 00309$:
-   0502 18 06              1062 	jr	00143$
-   0504 18 11              1063 	jr	00144$
-   0506 18 1A              1064 	jr	00145$
-   0508 18 28              1065 	jr	00146$
-   050A                    1066 00143$:
-                           1067 ;shooting.c:192: bulletX = playerX;
-   050A 21r2Er00           1068 	ld	hl,#_bulletX
-   050D 70                 1069 	ld	(hl),b
-                           1070 ;shooting.c:193: bulletY = playerY - 8;
-   050E E5                 1071 	push	hl
-   050F F8 02              1072 	ldhl	sp,#2
-   0511 7E                 1073 	ld	a,(hl)
-   0512 21r2Fr00           1074 	ld	hl,#_bulletY
-   0515 77                 1075 	ld	(hl),a
-   0516 E1                 1076 	pop	hl
-                           1077 ;shooting.c:194: case 1:
-   0517                    1078 00144$:
-                           1079 ;shooting.c:195: bulletX = playerX + 8;
-   0517 21r2Er00           1080 	ld	hl,#_bulletX
-   051A 73                 1081 	ld	(hl),e
-                           1082 ;shooting.c:196: bulletY = playerY;
-   051B 21r2Fr00           1083 	ld	hl,#_bulletY
-   051E 71                 1084 	ld	(hl),c
-                           1085 ;shooting.c:197: break;
-   051F C3rFBr05           1086 	jp	00162$
-                           1087 ;shooting.c:198: case 2:
-   0522                    1088 00145$:
-                           1089 ;shooting.c:199: bulletX = playerX;
-   0522 21r2Er00           1090 	ld	hl,#_bulletX
-   0525 70                 1091 	ld	(hl),b
-                           1092 ;shooting.c:200: bulletY = playerY - 8;
-   0526 E5                 1093 	push	hl
-   0527 F8 02              1094 	ldhl	sp,#2
-   0529 7E                 1095 	ld	a,(hl)
-   052A 21r2Fr00           1096 	ld	hl,#_bulletY
-   052D 77                 1097 	ld	(hl),a
-   052E E1                 1098 	pop	hl
-                           1099 ;shooting.c:201: break;
-   052F C3rFBr05           1100 	jp	00162$
-                           1101 ;shooting.c:202: case 3:
-   0532                    1102 00146$:
-                           1103 ;shooting.c:203: bulletX = playerX + 8;
-   0532 21r2Er00           1104 	ld	hl,#_bulletX
-   0535 73                 1105 	ld	(hl),e
-                           1106 ;shooting.c:204: bulletY = playerY;
-   0536 21r2Fr00           1107 	ld	hl,#_bulletY
-   0539 71                 1108 	ld	(hl),c
-                           1109 ;shooting.c:206: }
-   053A C3rFBr05           1110 	jp	00162$
-   053D                    1111 00149$:
-                           1112 ;shooting.c:208: bulletLive = 0;
-   053D 21r30r00           1113 	ld	hl,#_bulletLive
-   0540 36 00              1114 	ld	(hl),#0x00
-                           1115 ;shooting.c:209: bulletX = 0;
-   0542 21r2Er00           1116 	ld	hl,#_bulletX
-   0545 36 00              1117 	ld	(hl),#0x00
-                           1118 ;shooting.c:210: bulletY = 0;
-   0547 21r2Fr00           1119 	ld	hl,#_bulletY
-   054A 36 00              1120 	ld	(hl),#0x00
-   054C C3rFBr05           1121 	jp	00162$
-   054F                    1122 00161$:
-                           1123 ;shooting.c:213: switch (bulletDir) {
-   054F 3E 07              1124 	ld	a,#0x07
-   0551 21r31r00           1125 	ld	hl,#_bulletDir
-   0554 96                 1126 	sub	a, (hl)
-   0555 DArFBr05           1127 	jp	C,00162$
-                           1128 ;shooting.c:215: bulletY = bulletY - 2;
-   0558 21r2Fr00           1129 	ld	hl,#_bulletY
-   055B 46                 1130 	ld	b,(hl)
-   055C 05                 1131 	dec	b
-   055D 05                 1132 	dec	b
-                           1133 ;shooting.c:218: bulletX = bulletX + 2;
-   055E 21r2Er00           1134 	ld	hl,#_bulletX
-   0561 4E                 1135 	ld	c,(hl)
-   0562 0C                 1136 	inc	c
-   0563 0C                 1137 	inc	c
-                           1138 ;shooting.c:221: bulletY = bulletY + 2;
-   0564 21r2Fr00           1139 	ld	hl,#_bulletY
-   0567 7E                 1140 	ld	a,(hl)
-   0568 C6 02              1141 	add	a, #0x02
-   056A F8 00              1142 	ldhl	sp,#0
-   056C 77                 1143 	ld	(hl),a
-                           1144 ;shooting.c:224: bulletX = bulletX - 2;
-   056D 21r2Er00           1145 	ld	hl,#_bulletX
-   0570 7E                 1146 	ld	a,(hl)
-   0571 C6 FE              1147 	add	a,#0xfe
-   0573 F8 01              1148 	ldhl	sp,#1
-   0575 77                 1149 	ld	(hl),a
-                           1150 ;shooting.c:213: switch (bulletDir) {
-   0576 21r31r00           1151 	ld	hl,#_bulletDir
-   0579 5E                 1152 	ld	e,(hl)
-   057A 16 00              1153 	ld	d,#0x00
-   057C 21r83r05           1154 	ld	hl,#00310$
-   057F 19                 1155 	add	hl,de
-   0580 19                 1156 	add	hl,de
-   0581 19                 1157 	add	hl,de
-   0582 E9                 1158 	jp	(hl)
-   0583                    1159 00310$:
-   0583 C3r9Br05           1160 	jp	00151$
-   0586 C3rA2r05           1161 	jp	00152$
-   0589 C3rA9r05           1162 	jp	00153$
-   058C C3rB5r05           1163 	jp	00154$
-   058F C3rC1r05           1164 	jp	00155$
-   0592 C3rD0r05           1165 	jp	00156$
-   0595 C3rDAr05           1166 	jp	00157$
-   0598 C3rE9r05           1167 	jp	00158$
-                           1168 ;shooting.c:214: case 0:
-   059B                    1169 00151$:
-                           1170 ;shooting.c:215: bulletY = bulletY - 2;
-   059B 21r2Fr00           1171 	ld	hl,#_bulletY
-   059E 70                 1172 	ld	(hl),b
-                           1173 ;shooting.c:216: break;
-   059F C3rFBr05           1174 	jp	00162$
-                           1175 ;shooting.c:217: case 1:
-   05A2                    1176 00152$:
-                           1177 ;shooting.c:218: bulletX = bulletX + 2;
-   05A2 21r2Er00           1178 	ld	hl,#_bulletX
-   05A5 71                 1179 	ld	(hl),c
-                           1180 ;shooting.c:219: break;
-   05A6 C3rFBr05           1181 	jp	00162$
-                           1182 ;shooting.c:220: case 2:
-   05A9                    1183 00153$:
-                           1184 ;shooting.c:221: bulletY = bulletY + 2;
-   05A9 E5                 1185 	push	hl
-   05AA F8 02              1186 	ldhl	sp,#2
-   05AC 7E                 1187 	ld	a,(hl)
-   05AD 21r2Fr00           1188 	ld	hl,#_bulletY
-   05B0 77                 1189 	ld	(hl),a
-   05B1 E1                 1190 	pop	hl
-                           1191 ;shooting.c:222: break;
-   05B2 C3rFBr05           1192 	jp	00162$
-                           1193 ;shooting.c:223: case 3:
-   05B5                    1194 00154$:
-                           1195 ;shooting.c:224: bulletX = bulletX - 2;
-   05B5 E5                 1196 	push	hl
-   05B6 F8 03              1197 	ldhl	sp,#3
-   05B8 7E                 1198 	ld	a,(hl)
-   05B9 21r2Er00           1199 	ld	hl,#_bulletX
-   05BC 77                 1200 	ld	(hl),a
-   05BD E1                 1201 	pop	hl
-                           1202 ;shooting.c:225: break;
-   05BE C3rFBr05           1203 	jp	00162$
-                           1204 ;shooting.c:226: case 4:
-   05C1                    1205 00155$:
-                           1206 ;shooting.c:227: bulletX = bulletX - 2;
-   05C1 E5                 1207 	push	hl
-   05C2 F8 03              1208 	ldhl	sp,#3
-   05C4 7E                 1209 	ld	a,(hl)
-   05C5 21r2Er00           1210 	ld	hl,#_bulletX
-   05C8 77                 1211 	ld	(hl),a
-   05C9 E1                 1212 	pop	hl
-                           1213 ;shooting.c:228: bulletY = bulletY - 2;
-   05CA 21r2Fr00           1214 	ld	hl,#_bulletY
-   05CD 70                 1215 	ld	(hl),b
-                           1216 ;shooting.c:229: break;
-   05CE 18 2B              1217 	jr	00162$
-                           1218 ;shooting.c:230: case 5:
-   05D0                    1219 00156$:
-                           1220 ;shooting.c:231: bulletX = bulletX + 2;
-   05D0 21r2Er00           1221 	ld	hl,#_bulletX
-   05D3 71                 1222 	ld	(hl),c
-                           1223 ;shooting.c:232: bulletY = bulletY - 2;
-   05D4 21r2Fr00           1224 	ld	hl,#_bulletY
-   05D7 70                 1225 	ld	(hl),b
-                           1226 ;shooting.c:233: break;
-   05D8 18 21              1227 	jr	00162$
-                           1228 ;shooting.c:234: case 6:
-   05DA                    1229 00157$:
-                           1230 ;shooting.c:235: bulletX = bulletX + 2;
-   05DA 21r2Er00           1231 	ld	hl,#_bulletX
-   05DD 71                 1232 	ld	(hl),c
-                           1233 ;shooting.c:236: bulletY = bulletY + 2;
-   05DE E5                 1234 	push	hl
-   05DF F8 02              1235 	ldhl	sp,#2
-   05E1 7E                 1236 	ld	a,(hl)
-   05E2 21r2Fr00           1237 	ld	hl,#_bulletY
-   05E5 77                 1238 	ld	(hl),a
-   05E6 E1                 1239 	pop	hl
-                           1240 ;shooting.c:237: break;
-   05E7 18 12              1241 	jr	00162$
-                           1242 ;shooting.c:238: case 7:
-   05E9                    1243 00158$:
-                           1244 ;shooting.c:239: bulletX = bulletX - 2;
-   05E9 E5                 1245 	push	hl
-   05EA F8 03              1246 	ldhl	sp,#3
-   05EC 7E                 1247 	ld	a,(hl)
-   05ED 21r2Er00           1248 	ld	hl,#_bulletX
-   05F0 77                 1249 	ld	(hl),a
-   05F1 E1                 1250 	pop	hl
-                           1251 ;shooting.c:240: bulletY = bulletY + 2;
-   05F2 E5                 1252 	push	hl
-   05F3 F8 02              1253 	ldhl	sp,#2
-   05F5 7E                 1254 	ld	a,(hl)
-   05F6 21r2Fr00           1255 	ld	hl,#_bulletY
-   05F9 77                 1256 	ld	(hl),a
-   05FA E1                 1257 	pop	hl
-                           1258 ;shooting.c:242: }
-   05FB                    1259 00162$:
-                           1260 ;shooting.c:245: move_sprite(12, bulletX, bulletY);
-   05FB 21r2Fr00           1261 	ld	hl,#_bulletY
-   05FE 7E                 1262 	ld	a,(hl)
-   05FF F5                 1263 	push	af
-   0600 33                 1264 	inc	sp
-   0601 21r2Er00           1265 	ld	hl,#_bulletX
-   0604 7E                 1266 	ld	a,(hl)
-   0605 F5                 1267 	push	af
-   0606 33                 1268 	inc	sp
-   0607 3E 0C              1269 	ld	a,#0x0c
-   0609 F5                 1270 	push	af
-   060A 33                 1271 	inc	sp
-   060B CDr00r00           1272 	call	_move_sprite
-   060E E8 03              1273 	add	sp, #3
-                           1274 ;shooting.c:247: j = 0; // re use j for collision - saves space
-   0610 21r01r00           1275 	ld	hl,#_j
-   0613 36 00              1276 	ld	(hl),#0x00
-                           1277 ;shooting.c:249: for (i=0; i != 10; i++) {
-   0615 21r00r00           1278 	ld	hl,#_i
-   0618 36 00              1279 	ld	(hl),#0x00
-   061A                    1280 00172$:
-                           1281 ;shooting.c:250: if (collisionCheck(playerX, playerY, 8, 8, eX[i], eY[i], 8, 8) == 1){
-   061A 3Er0F              1282 	ld	a,#<(_eY)
-   061C 21r00r00           1283 	ld	hl,#_i
-   061F 86                 1284 	add	a, (hl)
-   0620 4F                 1285 	ld	c,a
-   0621 3Es00              1286 	ld	a,#>(_eY)
-   0623 CE 00              1287 	adc	a, #0x00
-   0625 47                 1288 	ld	b,a
-   0626 0A                 1289 	ld	a,(bc)
-   0627 F8 01              1290 	ldhl	sp,#1
-   0629 77                 1291 	ld	(hl),a
-   062A 3Er05              1292 	ld	a,#<(_eX)
-   062C 21r00r00           1293 	ld	hl,#_i
-   062F 86                 1294 	add	a, (hl)
-   0630 4F                 1295 	ld	c,a
-   0631 3Es00              1296 	ld	a,#>(_eX)
-   0633 CE 00              1297 	adc	a, #0x00
-   0635 47                 1298 	ld	b,a
-   0636 0A                 1299 	ld	a,(bc)
-   0637 47                 1300 	ld	b,a
-   0638 21 08 08           1301 	ld	hl,#0x0808
-   063B E5                 1302 	push	hl
-   063C F8 03              1303 	ldhl	sp,#3
-   063E 7E                 1304 	ld	a,(hl)
-   063F F5                 1305 	push	af
-   0640 33                 1306 	inc	sp
-   0641 C5                 1307 	push	bc
-   0642 33                 1308 	inc	sp
-   0643 21 08 08           1309 	ld	hl,#0x0808
-   0646 E5                 1310 	push	hl
-   0647 21r03r00           1311 	ld	hl,#_playerY
-   064A 7E                 1312 	ld	a,(hl)
-   064B F5                 1313 	push	af
-   064C 33                 1314 	inc	sp
-   064D 21r02r00           1315 	ld	hl,#_playerX
-   0650 7E                 1316 	ld	a,(hl)
-   0651 F5                 1317 	push	af
-   0652 33                 1318 	inc	sp
-   0653 CDr88r06           1319 	call	_collisionCheck
-   0656 E8 08              1320 	add	sp, #8
-   0658 1D                 1321 	dec	e
-   0659 20 05              1322 	jr	NZ,00173$
-                           1323 ;shooting.c:251: j= 1; // if a collision happens
-   065B 21r01r00           1324 	ld	hl,#_j
-   065E 36 01              1325 	ld	(hl),#0x01
-   0660                    1326 00173$:
-                           1327 ;shooting.c:249: for (i=0; i != 10; i++) {
-   0660 21r00r00           1328 	ld	hl,#_i
-   0663 34                 1329 	inc	(hl)
-   0664 7E                 1330 	ld	a,(hl)
-   0665 D6 0A              1331 	sub	a, #0x0a
-   0667 C2r1Ar06           1332 	jp	NZ,00172$
-                           1333 ;shooting.c:256: switch (j) {
-   066A 21r01r00           1334 	ld	hl,#_j
-   066D 7E                 1335 	ld	a,(hl)
-   066E B7                 1336 	or	a, a
-   066F 20 0B              1337 	jr	NZ,00170$
-                           1338 ;shooting.c:259: set_sprite_tile(0,0);
-   0671 21 00 00           1339 	ld	hl,#0x0000
-   0674 E5                 1340 	push	hl
-   0675 CDr00r00           1341 	call	_set_sprite_tile
-   0678 E8 02              1342 	add	sp, #2
-                           1343 ;shooting.c:260: break;
-   067A 18 09              1344 	jr	00174$
-                           1345 ;shooting.c:263: default:
-   067C                    1346 00170$:
-                           1347 ;shooting.c:264: set_sprite_tile(0,1);
-   067C 21 00 01           1348 	ld	hl,#0x0100
-   067F E5                 1349 	push	hl
-   0680 CDr00r00           1350 	call	_set_sprite_tile
-   0683 E8 02              1351 	add	sp, #2
-                           1352 ;shooting.c:266: }
-   0685                    1353 00174$:
-   0685 E8 02              1354 	add	sp, #2
-   0687 C9                 1355 	ret
-                           1356 ;shooting.c:271: UINT8 collisionCheck(UINT8 x1, UINT8 y1, UINT8 w1, UINT8 h1, UINT8 x2, UINT8 y2, UINT8 w2, UINT8 h2){
-                           1357 ;	---------------------------------
-                           1358 ; Function collisionCheck
-                           1359 ; ---------------------------------
-   0688                    1360 _collisionCheck::
-   0688 E8 FC              1361 	add	sp, #-4
-                           1362 ;shooting.c:272: if ((x1 < (x2+w2)) && ((x1+w1) > x2) && (y1 < (h2+y2)) && ((y1+h1) > y2)){
-   068A F8 0A              1363 	ldhl	sp,#10
-   068C 7E                 1364 	ld	a,(hl)
-   068D F8 02              1365 	ldhl	sp,#2
-   068F 22                 1366 	ld	(hl+),a
-   0690 36 00              1367 	ld	(hl),#0x00
-   0692 F8 0C              1368 	ldhl	sp,#12
-   0694 4E                 1369 	ld	c,(hl)
-   0695 06 00              1370 	ld	b,#0x00
-   0697 F8 02              1371 	ldhl	sp,#2
-   0699 2A                 1372 	ld	a,(hl+)
-   069A 66                 1373 	ld	h,(hl)
-   069B 6F                 1374 	ld	l,a
-   069C 09                 1375 	add	hl,bc
-   069D 4D                 1376 	ld	c,l
-   069E 44                 1377 	ld	b,h
-   069F F8 06              1378 	ldhl	sp,#6
-   06A1 7E                 1379 	ld	a,(hl)
-   06A2 F8 00              1380 	ldhl	sp,#0
-   06A4 22                 1381 	ld	(hl+),a
-   06A5 36 00              1382 	ld	(hl),#0x00
-   06A7 2B                 1383 	dec	hl
-   06A8 7E                 1384 	ld	a, (hl)
-   06A9 91                 1385 	sub	a, c
-   06AA 23                 1386 	inc	hl
-   06AB 7E                 1387 	ld	a, (hl)
-   06AC 98                 1388 	sbc	a, b
-   06AD 56                 1389 	ld	d, (hl)
-   06AE 78                 1390 	ld	a,b
-   06AF 5F                 1391 	ld	e, a
-   06B0 CB 7B              1392 	bit	7, e
-   06B2 28 07              1393 	jr	Z,00125$
-   06B4 CB 7A              1394 	bit	7, d
-   06B6 20 08              1395 	jr	NZ,00126$
-   06B8 BF                 1396 	cp	a, a
-   06B9 18 05              1397 	jr	00126$
-   06BB                    1398 00125$:
-   06BB CB 7A              1399 	bit	7, d
-   06BD 28 01              1400 	jr	Z,00126$
-   06BF 37                 1401 	scf
-   06C0                    1402 00126$:
-   06C0 D2r4Dr07           1403 	jp	NC,00102$
-   06C3 F8 08              1404 	ldhl	sp,#8
-   06C5 4E                 1405 	ld	c,(hl)
-   06C6 06 00              1406 	ld	b,#0x00
-   06C8 E1                 1407 	pop	hl
-   06C9 E5                 1408 	push	hl
-   06CA 09                 1409 	add	hl,bc
-   06CB 4D                 1410 	ld	c,l
-   06CC 44                 1411 	ld	b,h
-   06CD F8 02              1412 	ldhl	sp,#2
-   06CF 7E                 1413 	ld	a, (hl)
-   06D0 91                 1414 	sub	a, c
-   06D1 23                 1415 	inc	hl
-   06D2 7E                 1416 	ld	a, (hl)
-   06D3 98                 1417 	sbc	a, b
-   06D4 56                 1418 	ld	d, (hl)
-   06D5 78                 1419 	ld	a,b
-   06D6 5F                 1420 	ld	e, a
-   06D7 CB 7B              1421 	bit	7, e
-   06D9 28 07              1422 	jr	Z,00127$
-   06DB CB 7A              1423 	bit	7, d
-   06DD 20 08              1424 	jr	NZ,00128$
-   06DF BF                 1425 	cp	a, a
-   06E0 18 05              1426 	jr	00128$
-   06E2                    1427 00127$:
-   06E2 CB 7A              1428 	bit	7, d
-   06E4 28 01              1429 	jr	Z,00128$
-   06E6 37                 1430 	scf
-   06E7                    1431 00128$:
-   06E7 D2r4Dr07           1432 	jp	NC,00102$
-   06EA F8 0D              1433 	ldhl	sp,#13
-   06EC 4E                 1434 	ld	c,(hl)
-   06ED 06 00              1435 	ld	b,#0x00
-   06EF 2B                 1436 	dec	hl
-   06F0 2B                 1437 	dec	hl
-   06F1 7E                 1438 	ld	a,(hl)
-   06F2 F8 00              1439 	ldhl	sp,#0
-   06F4 22                 1440 	ld	(hl+),a
-   06F5 36 00              1441 	ld	(hl),#0x00
-   06F7 E1                 1442 	pop	hl
-   06F8 E5                 1443 	push	hl
-   06F9 09                 1444 	add	hl,bc
-   06FA 4D                 1445 	ld	c,l
-   06FB 44                 1446 	ld	b,h
-   06FC F8 07              1447 	ldhl	sp,#7
-   06FE 7E                 1448 	ld	a,(hl)
-   06FF F8 02              1449 	ldhl	sp,#2
-   0701 22                 1450 	ld	(hl+),a
-   0702 36 00              1451 	ld	(hl),#0x00
-   0704 2B                 1452 	dec	hl
-   0705 7E                 1453 	ld	a, (hl)
-   0706 91                 1454 	sub	a, c
-   0707 23                 1455 	inc	hl
-   0708 7E                 1456 	ld	a, (hl)
-   0709 98                 1457 	sbc	a, b
-   070A 56                 1458 	ld	d, (hl)
-   070B 78                 1459 	ld	a,b
-   070C 5F                 1460 	ld	e, a
-   070D CB 7B              1461 	bit	7, e
-   070F 28 07              1462 	jr	Z,00129$
-   0711 CB 7A              1463 	bit	7, d
-   0713 20 08              1464 	jr	NZ,00130$
-   0715 BF                 1465 	cp	a, a
-   0716 18 05              1466 	jr	00130$
-   0718                    1467 00129$:
-   0718 CB 7A              1468 	bit	7, d
-   071A 28 01              1469 	jr	Z,00130$
-   071C 37                 1470 	scf
-   071D                    1471 00130$:
-   071D D2r4Dr07           1472 	jp	NC,00102$
-   0720 F8 09              1473 	ldhl	sp,#9
-   0722 4E                 1474 	ld	c,(hl)
-   0723 06 00              1475 	ld	b,#0x00
-   0725 F8 02              1476 	ldhl	sp,#2
-   0727 2A                 1477 	ld	a,(hl+)
-   0728 66                 1478 	ld	h,(hl)
-   0729 6F                 1479 	ld	l,a
-   072A 09                 1480 	add	hl,bc
-   072B 4D                 1481 	ld	c,l
-   072C 44                 1482 	ld	b,h
-   072D F8 00              1483 	ldhl	sp,#0
-   072F 7E                 1484 	ld	a, (hl)
-   0730 91                 1485 	sub	a, c
-   0731 23                 1486 	inc	hl
-   0732 7E                 1487 	ld	a, (hl)
-   0733 98                 1488 	sbc	a, b
-   0734 56                 1489 	ld	d, (hl)
-   0735 78                 1490 	ld	a,b
-   0736 5F                 1491 	ld	e, a
-   0737 CB 7B              1492 	bit	7, e
-   0739 28 07              1493 	jr	Z,00131$
-   073B CB 7A              1494 	bit	7, d
-   073D 20 08              1495 	jr	NZ,00132$
-   073F BF                 1496 	cp	a, a
-   0740 18 05              1497 	jr	00132$
-   0742                    1498 00131$:
-   0742 CB 7A              1499 	bit	7, d
-   0744 28 01              1500 	jr	Z,00132$
-   0746 37                 1501 	scf
-   0747                    1502 00132$:
-   0747 30 04              1503 	jr	NC,00102$
-                           1504 ;shooting.c:273: return 1;
-   0749 1E 01              1505 	ld	e,#0x01
-   074B 18 02              1506 	jr	00107$
-   074D                    1507 00102$:
-                           1508 ;shooting.c:275: return 0;
-   074D 1E 00              1509 	ld	e,#0x00
-   074F                    1510 00107$:
-   074F E8 04              1511 	add	sp, #4
-   0751 C9                 1512 	ret
-                           1513 	.area _CODE
-                           1514 	.area _CABS (ABS)
+                             88 	.area _HOME
+                             89 	.area _HOME
+                             90 ;--------------------------------------------------------
+                             91 ; code
+                             92 ;--------------------------------------------------------
+                             93 	.area _CODE
+                             94 ;shooting.c:32: void main() {
+                             95 ;	---------------------------------
+                             96 ; Function main
+                             97 ; ---------------------------------
+   0000                      98 _main::
+                             99 ;shooting.c:34: initGame();
+   0000 CDr6Fr01            100 	call	_initGame
+                            101 ;shooting.c:36: while(1) {
+   0003                     102 00102$:
+                            103 ;shooting.c:37: updatePlayer(); // update player position
+   0003 CDr0Ar03            104 	call	_updatePlayer
+                            105 ;shooting.c:38: HIDE_WIN; // Hide window layer - no windows used
+   0006 11 40 FF            106 	ld	de,#0xff40
+   0009 1A                  107 	ld	a,(de)
+   000A 4F                  108 	ld	c,a
+   000B 06 00               109 	ld	b,#0x00
+   000D CB A9               110 	res	5, c
+   000F 06 00               111 	ld	b,#0x00
+   0011 21 40 FF            112 	ld	hl,#0xff40
+   0014 71                  113 	ld	(hl),c
+                            114 ;shooting.c:39: SHOW_SPRITES; // Show sprites layer
+   0015 11 40 FF            115 	ld	de,#0xff40
+   0018 1A                  116 	ld	a,(de)
+   0019 4F                  117 	ld	c,a
+   001A 06 00               118 	ld	b,#0x00
+   001C 79                  119 	ld	a,c
+   001D CB CF               120 	set	1, a
+   001F 4F                  121 	ld	c,a
+   0020 2E 40               122 	ld	l, #0x40
+   0022 71                  123 	ld	(hl),c
+                            124 ;shooting.c:40: SHOW_BKG; // Show background layer
+   0023 11 40 FF            125 	ld	de,#0xff40
+   0026 1A                  126 	ld	a,(de)
+   0027 4F                  127 	ld	c,a
+   0028 06 00               128 	ld	b,#0x00
+   002A 79                  129 	ld	a,c
+   002B CB C7               130 	set	0, a
+   002D 4F                  131 	ld	c,a
+   002E 2E 40               132 	ld	l, #0x40
+   0030 71                  133 	ld	(hl),c
+                            134 ;shooting.c:41: lastKeys = joypad(); // Update keypresses
+   0031 CDr00r00            135 	call	_joypad
+   0034 21r19r00            136 	ld	hl,#_lastKeys
+   0037 73                  137 	ld	(hl),e
+                            138 ;shooting.c:42: wait_vbl_done(); // Wait for vblank to finish - ensures a 60fps max
+   0038 CDr00r00            139 	call	_wait_vbl_done
+   003B C3r03r00            140 	jp	00102$
+   003E C9                  141 	ret
+   003F                     142 _sprites:
+   003F FF                  143 	.db #0xff	; 255
+   0040 FF                  144 	.db #0xff	; 255
+   0041 81                  145 	.db #0x81	; 129
+   0042 81                  146 	.db #0x81	; 129
+   0043 A5                  147 	.db #0xa5	; 165
+   0044 A5                  148 	.db #0xa5	; 165
+   0045 A5                  149 	.db #0xa5	; 165
+   0046 A5                  150 	.db #0xa5	; 165
+   0047 81                  151 	.db #0x81	; 129
+   0048 81                  152 	.db #0x81	; 129
+   0049 99                  153 	.db #0x99	; 153
+   004A 99                  154 	.db #0x99	; 153
+   004B 81                  155 	.db #0x81	; 129
+   004C 81                  156 	.db #0x81	; 129
+   004D FF                  157 	.db #0xff	; 255
+   004E FF                  158 	.db #0xff	; 255
+   004F 3C                  159 	.db #0x3c	; 60
+   0050 3C                  160 	.db #0x3c	; 60
+   0051 42                  161 	.db #0x42	; 66	'B'
+   0052 42                  162 	.db #0x42	; 66	'B'
+   0053 81                  163 	.db #0x81	; 129
+   0054 81                  164 	.db #0x81	; 129
+   0055 ED                  165 	.db #0xed	; 237
+   0056 ED                  166 	.db #0xed	; 237
+   0057 81                  167 	.db #0x81	; 129
+   0058 81                  168 	.db #0x81	; 129
+   0059 91                  169 	.db #0x91	; 145
+   005A 91                  170 	.db #0x91	; 145
+   005B 42                  171 	.db #0x42	; 66	'B'
+   005C 42                  172 	.db #0x42	; 66	'B'
+   005D 3C                  173 	.db #0x3c	; 60
+   005E 3C                  174 	.db #0x3c	; 60
+   005F 99                  175 	.db #0x99	; 153
+   0060 81                  176 	.db #0x81	; 129
+   0061 42                  177 	.db #0x42	; 66	'B'
+   0062 5A                  178 	.db #0x5a	; 90	'Z'
+   0063 24                  179 	.db #0x24	; 36
+   0064 3C                  180 	.db #0x3c	; 60
+   0065 99                  181 	.db #0x99	; 153
+   0066 7E                  182 	.db #0x7e	; 126
+   0067 99                  183 	.db #0x99	; 153
+   0068 7E                  184 	.db #0x7e	; 126
+   0069 24                  185 	.db #0x24	; 36
+   006A 3C                  186 	.db #0x3c	; 60
+   006B 42                  187 	.db #0x42	; 66	'B'
+   006C 5A                  188 	.db #0x5a	; 90	'Z'
+   006D 99                  189 	.db #0x99	; 153
+   006E 81                  190 	.db #0x81	; 129
+   006F 38                  191 	.db #0x38	; 56	'8'
+   0070 04                  192 	.db #0x04	; 4
+   0071 7C                  193 	.db #0x7c	; 124
+   0072 02                  194 	.db #0x02	; 2
+   0073 5C                  195 	.db #0x5c	; 92
+   0074 22                  196 	.db #0x22	; 34
+   0075 5C                  197 	.db #0x5c	; 92
+   0076 22                  198 	.db #0x22	; 34
+   0077 5C                  199 	.db #0x5c	; 92
+   0078 22                  200 	.db #0x22	; 34
+   0079 5C                  201 	.db #0x5c	; 92
+   007A 22                  202 	.db #0x22	; 34
+   007B 7C                  203 	.db #0x7c	; 124
+   007C 02                  204 	.db #0x02	; 2
+   007D 38                  205 	.db #0x38	; 56	'8'
+   007E 04                  206 	.db #0x04	; 4
+   007F 00                  207 	.db #0x00	; 0
+   0080 00                  208 	.db #0x00	; 0
+   0081 3E                  209 	.db #0x3e	; 62
+   0082 3E                  210 	.db #0x3e	; 62
+   0083 63                  211 	.db #0x63	; 99	'c'
+   0084 63                  212 	.db #0x63	; 99	'c'
+   0085 63                  213 	.db #0x63	; 99	'c'
+   0086 63                  214 	.db #0x63	; 99	'c'
+   0087 63                  215 	.db #0x63	; 99	'c'
+   0088 63                  216 	.db #0x63	; 99	'c'
+   0089 63                  217 	.db #0x63	; 99	'c'
+   008A 63                  218 	.db #0x63	; 99	'c'
+   008B 3E                  219 	.db #0x3e	; 62
+   008C 3E                  220 	.db #0x3e	; 62
+   008D 00                  221 	.db #0x00	; 0
+   008E 00                  222 	.db #0x00	; 0
+   008F 00                  223 	.db #0x00	; 0
+   0090 00                  224 	.db #0x00	; 0
+   0091 1C                  225 	.db #0x1c	; 28
+   0092 1C                  226 	.db #0x1c	; 28
+   0093 3C                  227 	.db #0x3c	; 60
+   0094 3C                  228 	.db #0x3c	; 60
+   0095 6C                  229 	.db #0x6c	; 108	'l'
+   0096 6C                  230 	.db #0x6c	; 108	'l'
+   0097 0C                  231 	.db #0x0c	; 12
+   0098 0C                  232 	.db #0x0c	; 12
+   0099 0C                  233 	.db #0x0c	; 12
+   009A 0C                  234 	.db #0x0c	; 12
+   009B 7F                  235 	.db #0x7f	; 127
+   009C 7F                  236 	.db #0x7f	; 127
+   009D 00                  237 	.db #0x00	; 0
+   009E 00                  238 	.db #0x00	; 0
+   009F 00                  239 	.db #0x00	; 0
+   00A0 00                  240 	.db #0x00	; 0
+   00A1 3E                  241 	.db #0x3e	; 62
+   00A2 3E                  242 	.db #0x3e	; 62
+   00A3 63                  243 	.db #0x63	; 99	'c'
+   00A4 63                  244 	.db #0x63	; 99	'c'
+   00A5 03                  245 	.db #0x03	; 3
+   00A6 03                  246 	.db #0x03	; 3
+   00A7 1E                  247 	.db #0x1e	; 30
+   00A8 1E                  248 	.db #0x1e	; 30
+   00A9 70                  249 	.db #0x70	; 112	'p'
+   00AA 70                  250 	.db #0x70	; 112	'p'
+   00AB 7F                  251 	.db #0x7f	; 127
+   00AC 7F                  252 	.db #0x7f	; 127
+   00AD 00                  253 	.db #0x00	; 0
+   00AE 00                  254 	.db #0x00	; 0
+   00AF 00                  255 	.db #0x00	; 0
+   00B0 00                  256 	.db #0x00	; 0
+   00B1 7F                  257 	.db #0x7f	; 127
+   00B2 7F                  258 	.db #0x7f	; 127
+   00B3 03                  259 	.db #0x03	; 3
+   00B4 03                  260 	.db #0x03	; 3
+   00B5 3E                  261 	.db #0x3e	; 62
+   00B6 3E                  262 	.db #0x3e	; 62
+   00B7 07                  263 	.db #0x07	; 7
+   00B8 07                  264 	.db #0x07	; 7
+   00B9 43                  265 	.db #0x43	; 67	'C'
+   00BA 43                  266 	.db #0x43	; 67	'C'
+   00BB 3E                  267 	.db #0x3e	; 62
+   00BC 3E                  268 	.db #0x3e	; 62
+   00BD 00                  269 	.db #0x00	; 0
+   00BE 00                  270 	.db #0x00	; 0
+   00BF 00                  271 	.db #0x00	; 0
+   00C0 00                  272 	.db #0x00	; 0
+   00C1 60                  273 	.db #0x60	; 96
+   00C2 60                  274 	.db #0x60	; 96
+   00C3 6C                  275 	.db #0x6c	; 108	'l'
+   00C4 6C                  276 	.db #0x6c	; 108	'l'
+   00C5 6C                  277 	.db #0x6c	; 108	'l'
+   00C6 6C                  278 	.db #0x6c	; 108	'l'
+   00C7 7F                  279 	.db #0x7f	; 127
+   00C8 7F                  280 	.db #0x7f	; 127
+   00C9 0C                  281 	.db #0x0c	; 12
+   00CA 0C                  282 	.db #0x0c	; 12
+   00CB 0C                  283 	.db #0x0c	; 12
+   00CC 0C                  284 	.db #0x0c	; 12
+   00CD 00                  285 	.db #0x00	; 0
+   00CE 00                  286 	.db #0x00	; 0
+   00CF 00                  287 	.db #0x00	; 0
+   00D0 00                  288 	.db #0x00	; 0
+   00D1 7F                  289 	.db #0x7f	; 127
+   00D2 7F                  290 	.db #0x7f	; 127
+   00D3 60                  291 	.db #0x60	; 96
+   00D4 60                  292 	.db #0x60	; 96
+   00D5 7E                  293 	.db #0x7e	; 126
+   00D6 7E                  294 	.db #0x7e	; 126
+   00D7 03                  295 	.db #0x03	; 3
+   00D8 03                  296 	.db #0x03	; 3
+   00D9 63                  297 	.db #0x63	; 99	'c'
+   00DA 63                  298 	.db #0x63	; 99	'c'
+   00DB 3E                  299 	.db #0x3e	; 62
+   00DC 3E                  300 	.db #0x3e	; 62
+   00DD 00                  301 	.db #0x00	; 0
+   00DE 00                  302 	.db #0x00	; 0
+   00DF 00                  303 	.db #0x00	; 0
+   00E0 00                  304 	.db #0x00	; 0
+   00E1 3F                  305 	.db #0x3f	; 63
+   00E2 3F                  306 	.db #0x3f	; 63
+   00E3 60                  307 	.db #0x60	; 96
+   00E4 60                  308 	.db #0x60	; 96
+   00E5 7E                  309 	.db #0x7e	; 126
+   00E6 7E                  310 	.db #0x7e	; 126
+   00E7 63                  311 	.db #0x63	; 99	'c'
+   00E8 63                  312 	.db #0x63	; 99	'c'
+   00E9 63                  313 	.db #0x63	; 99	'c'
+   00EA 63                  314 	.db #0x63	; 99	'c'
+   00EB 3E                  315 	.db #0x3e	; 62
+   00EC 3E                  316 	.db #0x3e	; 62
+   00ED 00                  317 	.db #0x00	; 0
+   00EE 00                  318 	.db #0x00	; 0
+   00EF 00                  319 	.db #0x00	; 0
+   00F0 00                  320 	.db #0x00	; 0
+   00F1 7F                  321 	.db #0x7f	; 127
+   00F2 7F                  322 	.db #0x7f	; 127
+   00F3 03                  323 	.db #0x03	; 3
+   00F4 03                  324 	.db #0x03	; 3
+   00F5 06                  325 	.db #0x06	; 6
+   00F6 06                  326 	.db #0x06	; 6
+   00F7 0C                  327 	.db #0x0c	; 12
+   00F8 0C                  328 	.db #0x0c	; 12
+   00F9 18                  329 	.db #0x18	; 24
+   00FA 18                  330 	.db #0x18	; 24
+   00FB 30                  331 	.db #0x30	; 48	'0'
+   00FC 30                  332 	.db #0x30	; 48	'0'
+   00FD 00                  333 	.db #0x00	; 0
+   00FE 00                  334 	.db #0x00	; 0
+   00FF 00                  335 	.db #0x00	; 0
+   0100 00                  336 	.db #0x00	; 0
+   0101 3E                  337 	.db #0x3e	; 62
+   0102 3E                  338 	.db #0x3e	; 62
+   0103 63                  339 	.db #0x63	; 99	'c'
+   0104 63                  340 	.db #0x63	; 99	'c'
+   0105 63                  341 	.db #0x63	; 99	'c'
+   0106 63                  342 	.db #0x63	; 99	'c'
+   0107 3E                  343 	.db #0x3e	; 62
+   0108 3E                  344 	.db #0x3e	; 62
+   0109 63                  345 	.db #0x63	; 99	'c'
+   010A 63                  346 	.db #0x63	; 99	'c'
+   010B 3E                  347 	.db #0x3e	; 62
+   010C 3E                  348 	.db #0x3e	; 62
+   010D 00                  349 	.db #0x00	; 0
+   010E 00                  350 	.db #0x00	; 0
+   010F 00                  351 	.db #0x00	; 0
+   0110 00                  352 	.db #0x00	; 0
+   0111 3E                  353 	.db #0x3e	; 62
+   0112 3E                  354 	.db #0x3e	; 62
+   0113 63                  355 	.db #0x63	; 99	'c'
+   0114 63                  356 	.db #0x63	; 99	'c'
+   0115 63                  357 	.db #0x63	; 99	'c'
+   0116 63                  358 	.db #0x63	; 99	'c'
+   0117 3F                  359 	.db #0x3f	; 63
+   0118 3F                  360 	.db #0x3f	; 63
+   0119 03                  361 	.db #0x03	; 3
+   011A 03                  362 	.db #0x03	; 3
+   011B 7E                  363 	.db #0x7e	; 126
+   011C 7E                  364 	.db #0x7e	; 126
+   011D 00                  365 	.db #0x00	; 0
+   011E 00                  366 	.db #0x00	; 0
+   011F                     367 _myBkgData:
+   011F 00                  368 	.db #0x00	; 0
+   0120 00                  369 	.db #0x00	; 0
+   0121 00                  370 	.db #0x00	; 0
+   0122 00                  371 	.db #0x00	; 0
+   0123 00                  372 	.db #0x00	; 0
+   0124 00                  373 	.db #0x00	; 0
+   0125 00                  374 	.db #0x00	; 0
+   0126 00                  375 	.db #0x00	; 0
+   0127 00                  376 	.db #0x00	; 0
+   0128 00                  377 	.db #0x00	; 0
+   0129 00                  378 	.db #0x00	; 0
+   012A 00                  379 	.db #0x00	; 0
+   012B 00                  380 	.db #0x00	; 0
+   012C 00                  381 	.db #0x00	; 0
+   012D 00                  382 	.db #0x00	; 0
+   012E 00                  383 	.db #0x00	; 0
+   012F 00                  384 	.db #0x00	; 0
+   0130 00                  385 	.db #0x00	; 0
+   0131 08                  386 	.db #0x08	; 8
+   0132 00                  387 	.db #0x00	; 0
+   0133 08                  388 	.db #0x08	; 8
+   0134 00                  389 	.db #0x00	; 0
+   0135 36                  390 	.db #0x36	; 54	'6'
+   0136 00                  391 	.db #0x00	; 0
+   0137 08                  392 	.db #0x08	; 8
+   0138 00                  393 	.db #0x00	; 0
+   0139 08                  394 	.db #0x08	; 8
+   013A 00                  395 	.db #0x00	; 0
+   013B 00                  396 	.db #0x00	; 0
+   013C 00                  397 	.db #0x00	; 0
+   013D 00                  398 	.db #0x00	; 0
+   013E 00                  399 	.db #0x00	; 0
+   013F 00                  400 	.db #0x00	; 0
+   0140 00                  401 	.db #0x00	; 0
+   0141 00                  402 	.db #0x00	; 0
+   0142 00                  403 	.db #0x00	; 0
+   0143 20                  404 	.db #0x20	; 32
+   0144 00                  405 	.db #0x00	; 0
+   0145 50                  406 	.db #0x50	; 80	'P'
+   0146 00                  407 	.db #0x00	; 0
+   0147 20                  408 	.db #0x20	; 32
+   0148 00                  409 	.db #0x00	; 0
+   0149 00                  410 	.db #0x00	; 0
+   014A 00                  411 	.db #0x00	; 0
+   014B 00                  412 	.db #0x00	; 0
+   014C 00                  413 	.db #0x00	; 0
+   014D 00                  414 	.db #0x00	; 0
+   014E 00                  415 	.db #0x00	; 0
+   014F 00                  416 	.db #0x00	; 0
+   0150 00                  417 	.db #0x00	; 0
+   0151 00                  418 	.db #0x00	; 0
+   0152 00                  419 	.db #0x00	; 0
+   0153 00                  420 	.db #0x00	; 0
+   0154 00                  421 	.db #0x00	; 0
+   0155 00                  422 	.db #0x00	; 0
+   0156 00                  423 	.db #0x00	; 0
+   0157 00                  424 	.db #0x00	; 0
+   0158 00                  425 	.db #0x00	; 0
+   0159 04                  426 	.db #0x04	; 4
+   015A 00                  427 	.db #0x00	; 0
+   015B 0E                  428 	.db #0x0e	; 14
+   015C 00                  429 	.db #0x00	; 0
+   015D 04                  430 	.db #0x04	; 4
+   015E 00                  431 	.db #0x00	; 0
+   015F 00                  432 	.db #0x00	; 0
+   0160 00                  433 	.db #0x00	; 0
+   0161 00                  434 	.db #0x00	; 0
+   0162 00                  435 	.db #0x00	; 0
+   0163 00                  436 	.db #0x00	; 0
+   0164 00                  437 	.db #0x00	; 0
+   0165 00                  438 	.db #0x00	; 0
+   0166 00                  439 	.db #0x00	; 0
+   0167 50                  440 	.db #0x50	; 80	'P'
+   0168 00                  441 	.db #0x00	; 0
+   0169 20                  442 	.db #0x20	; 32
+   016A 00                  443 	.db #0x00	; 0
+   016B 50                  444 	.db #0x50	; 80	'P'
+   016C 00                  445 	.db #0x00	; 0
+   016D 00                  446 	.db #0x00	; 0
+   016E 00                  447 	.db #0x00	; 0
+                            448 ;shooting.c:46: void initGame(){
+                            449 ;	---------------------------------
+                            450 ; Function initGame
+                            451 ; ---------------------------------
+   016F                     452 _initGame::
+   016F 3B                  453 	dec	sp
+                            454 ;shooting.c:47: DISPLAY_ON; // turns on gameboy lcd
+   0170 11 40 FF            455 	ld	de,#0xff40
+   0173 1A                  456 	ld	a,(de)
+   0174 4F                  457 	ld	c,a
+   0175 06 00               458 	ld	b,#0x00
+   0177 79                  459 	ld	a,c
+   0178 CB FF               460 	set	7, a
+   017A 4F                  461 	ld	c,a
+   017B 21 40 FF            462 	ld	hl,#0xff40
+   017E 71                  463 	ld	(hl),c
+                            464 ;shooting.c:48: NR52_REG = 0x8F; // sound on
+   017F 2E 26               465 	ld	l, #0x26
+   0181 36 8F               466 	ld	(hl),#0x8f
+                            467 ;shooting.c:49: NR51_REG = 0x11; // both sound channels
+   0183 2E 25               468 	ld	l, #0x25
+   0185 36 11               469 	ld	(hl),#0x11
+                            470 ;shooting.c:50: NR50_REG = 0x77; // volume level, max = 0x77, min = 0x00
+   0187 2E 24               471 	ld	l, #0x24
+   0189 36 77               472 	ld	(hl),#0x77
+                            473 ;shooting.c:52: initrand(DIV_REG); // part of gb/rand.h, want to use DIV_REG as per the documentation
+   018B 11 04 FF            474 	ld	de,#0xff04
+   018E 1A                  475 	ld	a,(de)
+   018F 4F                  476 	ld	c,a
+   0190 06 00               477 	ld	b,#0x00
+   0192 C5                  478 	push	bc
+   0193 CDr00r00            479 	call	_initrand
+   0196 E8 02               480 	add	sp, #2
+                            481 ;shooting.c:53: set_sprite_data(0, 14, sprites); // storing sprite data
+   0198 21r3Fr00            482 	ld	hl,#_sprites
+   019B E5                  483 	push	hl
+   019C 21 00 0E            484 	ld	hl,#0x0e00
+   019F E5                  485 	push	hl
+   01A0 CDr00r00            486 	call	_set_sprite_data
+   01A3 E8 04               487 	add	sp, #4
+                            488 ;shooting.c:54: set_bkg_data(0, 4, myBkgData); // storing background data - window layer shares this
+   01A5 21r1Fr01            489 	ld	hl,#_myBkgData
+   01A8 E5                  490 	push	hl
+   01A9 21 00 04            491 	ld	hl,#0x0400
+   01AC E5                  492 	push	hl
+   01AD CDr00r00            493 	call	_set_bkg_data
+   01B0 E8 04               494 	add	sp, #4
+                            495 ;shooting.c:56: playerX = 64; // initial x position for player
+   01B2 21r02r00            496 	ld	hl,#_playerX
+   01B5 36 40               497 	ld	(hl),#0x40
+                            498 ;shooting.c:57: playerY = 64; // initial y position for player
+   01B7 21r03r00            499 	ld	hl,#_playerY
+   01BA 36 40               500 	ld	(hl),#0x40
+                            501 ;shooting.c:59: set_sprite_tile(0,0); // sprite tile representing the player - is first sprite, so 0th index
+   01BC 21 00 00            502 	ld	hl,#0x0000
+   01BF E5                  503 	push	hl
+   01C0 CDr00r00            504 	call	_set_sprite_tile
+   01C3 E8 02               505 	add	sp, #2
+                            506 ;shooting.c:62: for (i=0; i !=10; i++) {
+   01C5 21r00r00            507 	ld	hl,#_i
+   01C8 36 00               508 	ld	(hl),#0x00
+   01CA                     509 00105$:
+                            510 ;shooting.c:63: eX[i] = 16+(rand()); // random x position between 16 and 144
+   01CA 3Er05               511 	ld	a,#<(_eX)
+   01CC 21r00r00            512 	ld	hl,#_i
+   01CF 86                  513 	add	a, (hl)
+   01D0 4F                  514 	ld	c,a
+   01D1 3Es00               515 	ld	a,#>(_eX)
+   01D3 CE 00               516 	adc	a, #0x00
+   01D5 47                  517 	ld	b,a
+   01D6 C5                  518 	push	bc
+   01D7 CDr00r00            519 	call	_rand
+   01DA C1                  520 	pop	bc
+   01DB 7B                  521 	ld	a,e
+   01DC C6 10               522 	add	a, #0x10
+   01DE 02                  523 	ld	(bc),a
+                            524 ;shooting.c:64: eY[i] = 16+(rand()); // random y position between 16 and 144
+   01DF 3Er0F               525 	ld	a,#<(_eY)
+   01E1 21r00r00            526 	ld	hl,#_i
+   01E4 86                  527 	add	a, (hl)
+   01E5 4F                  528 	ld	c,a
+   01E6 3Es00               529 	ld	a,#>(_eY)
+   01E8 CE 00               530 	adc	a, #0x00
+   01EA 47                  531 	ld	b,a
+   01EB C5                  532 	push	bc
+   01EC CDr00r00            533 	call	_rand
+   01EF C1                  534 	pop	bc
+   01F0 7B                  535 	ld	a,e
+   01F1 C6 10               536 	add	a, #0x10
+   01F3 02                  537 	ld	(bc),a
+                            538 ;shooting.c:65: set_sprite_tile(i+1, 2); // enemy sprite tile set to 2
+   01F4 21r00r00            539 	ld	hl,#_i
+   01F7 46                  540 	ld	b,(hl)
+   01F8 04                  541 	inc	b
+   01F9 3E 02               542 	ld	a,#0x02
+   01FB F5                  543 	push	af
+   01FC 33                  544 	inc	sp
+   01FD C5                  545 	push	bc
+   01FE 33                  546 	inc	sp
+   01FF CDr00r00            547 	call	_set_sprite_tile
+   0202 E8 02               548 	add	sp, #2
+                            549 ;shooting.c:66: move_sprite(i+1,eX[i], eY[i]); // place enemies
+   0204 3Er0F               550 	ld	a,#<(_eY)
+   0206 21r00r00            551 	ld	hl,#_i
+   0209 86                  552 	add	a, (hl)
+   020A 4F                  553 	ld	c,a
+   020B 3Es00               554 	ld	a,#>(_eY)
+   020D CE 00               555 	adc	a, #0x00
+   020F 47                  556 	ld	b,a
+   0210 0A                  557 	ld	a,(bc)
+   0211 F8 00               558 	ldhl	sp,#0
+   0213 77                  559 	ld	(hl),a
+   0214 3Er05               560 	ld	a,#<(_eX)
+   0216 21r00r00            561 	ld	hl,#_i
+   0219 86                  562 	add	a, (hl)
+   021A 4F                  563 	ld	c,a
+   021B 3Es00               564 	ld	a,#>(_eX)
+   021D CE 00               565 	adc	a, #0x00
+   021F 47                  566 	ld	b,a
+   0220 0A                  567 	ld	a,(bc)
+   0221 57                  568 	ld	d,a
+   0222 46                  569 	ld	b,(hl)
+   0223 04                  570 	inc	b
+   0224 F8 00               571 	ldhl	sp,#0
+   0226 7E                  572 	ld	a,(hl)
+   0227 F5                  573 	push	af
+   0228 33                  574 	inc	sp
+   0229 D5                  575 	push	de
+   022A 33                  576 	inc	sp
+   022B C5                  577 	push	bc
+   022C 33                  578 	inc	sp
+   022D CDr00r00            579 	call	_move_sprite
+   0230 E8 03               580 	add	sp, #3
+                            581 ;shooting.c:62: for (i=0; i !=10; i++) {
+   0232 21r00r00            582 	ld	hl,#_i
+   0235 34                  583 	inc	(hl)
+   0236 7E                  584 	ld	a,(hl)
+   0237 D6 0A               585 	sub	a, #0x0a
+   0239 C2rCAr01            586 	jp	NZ,00105$
+                            587 ;shooting.c:70: shooting = 0;
+   023C 21r32r00            588 	ld	hl,#_shooting
+   023F 36 00               589 	ld	(hl),#0x00
+                            590 ;shooting.c:71: set_sprite_tile(12, 3); // sets sprite tile 03 to index 12
+   0241 21 0C 03            591 	ld	hl,#0x030c
+   0244 E5                  592 	push	hl
+   0245 CDr00r00            593 	call	_set_sprite_tile
+   0248 E8 02               594 	add	sp, #2
+                            595 ;shooting.c:73: for (i = 0; i != 1; i++) {
+   024A 21r00r00            596 	ld	hl,#_i
+   024D 36 00               597 	ld	(hl),#0x00
+   024F                     598 00107$:
+                            599 ;shooting.c:74: bullets[i].x = 0;
+   024F 21r00r00            600 	ld	hl,#_i
+   0252 4E                  601 	ld	c,(hl)
+   0253 06 00               602 	ld	b,#0x00
+   0255 CB 21               603 	sla	c
+   0257 CB 10               604 	rl	b
+   0259 CB 21               605 	sla	c
+   025B CB 10               606 	rl	b
+   025D 21r33r00            607 	ld	hl,#_bullets
+   0260 09                  608 	add	hl,bc
+   0261 4D                  609 	ld	c,l
+   0262 44                  610 	ld	b,h
+   0263 AF                  611 	xor	a, a
+   0264 02                  612 	ld	(bc),a
+                            613 ;shooting.c:75: bullets[i].y = 0;
+   0265 21r00r00            614 	ld	hl,#_i
+   0268 4E                  615 	ld	c,(hl)
+   0269 06 00               616 	ld	b,#0x00
+   026B CB 21               617 	sla	c
+   026D CB 10               618 	rl	b
+   026F CB 21               619 	sla	c
+   0271 CB 10               620 	rl	b
+   0273 21r33r00            621 	ld	hl,#_bullets
+   0276 09                  622 	add	hl,bc
+   0277 4D                  623 	ld	c,l
+   0278 44                  624 	ld	b,h
+   0279 03                  625 	inc	bc
+   027A AF                  626 	xor	a, a
+   027B 02                  627 	ld	(bc),a
+                            628 ;shooting.c:76: bullets[i].alive = 0;
+   027C 21r00r00            629 	ld	hl,#_i
+   027F 4E                  630 	ld	c,(hl)
+   0280 06 00               631 	ld	b,#0x00
+   0282 CB 21               632 	sla	c
+   0284 CB 10               633 	rl	b
+   0286 CB 21               634 	sla	c
+   0288 CB 10               635 	rl	b
+   028A 21r33r00            636 	ld	hl,#_bullets
+   028D 09                  637 	add	hl,bc
+   028E 4D                  638 	ld	c,l
+   028F 44                  639 	ld	b,h
+   0290 03                  640 	inc	bc
+   0291 03                  641 	inc	bc
+   0292 AF                  642 	xor	a, a
+   0293 02                  643 	ld	(bc),a
+                            644 ;shooting.c:77: bullets[i].direction = 0;
+   0294 21r00r00            645 	ld	hl,#_i
+   0297 4E                  646 	ld	c,(hl)
+   0298 06 00               647 	ld	b,#0x00
+   029A CB 21               648 	sla	c
+   029C CB 10               649 	rl	b
+   029E CB 21               650 	sla	c
+   02A0 CB 10               651 	rl	b
+   02A2 21r33r00            652 	ld	hl,#_bullets
+   02A5 09                  653 	add	hl,bc
+   02A6 4D                  654 	ld	c,l
+   02A7 44                  655 	ld	b,h
+   02A8 03                  656 	inc	bc
+   02A9 03                  657 	inc	bc
+   02AA 03                  658 	inc	bc
+   02AB AF                  659 	xor	a, a
+   02AC 02                  660 	ld	(bc),a
+                            661 ;shooting.c:73: for (i = 0; i != 1; i++) {
+   02AD 21r00r00            662 	ld	hl,#_i
+   02B0 34                  663 	inc	(hl)
+   02B1 7E                  664 	ld	a,(hl)
+   02B2 3D                  665 	dec	a
+   02B3 C2r4Fr02            666 	jp	NZ,00107$
+                            667 ;shooting.c:81: for (j=0; j != 18; j++) {
+   02B6 21r01r00            668 	ld	hl,#_j
+   02B9 36 00               669 	ld	(hl),#0x00
+   02BB                     670 00111$:
+                            671 ;shooting.c:82: for (i=0; i != 20; i++) {
+   02BB 21r00r00            672 	ld	hl,#_i
+   02BE 36 00               673 	ld	(hl),#0x00
+   02C0                     674 00109$:
+                            675 ;shooting.c:83: randomBkgTiles[i] = rand() % 4;
+   02C0 3Er1A               676 	ld	a,#<(_randomBkgTiles)
+   02C2 21r00r00            677 	ld	hl,#_i
+   02C5 86                  678 	add	a, (hl)
+   02C6 4F                  679 	ld	c,a
+   02C7 3Es00               680 	ld	a,#>(_randomBkgTiles)
+   02C9 CE 00               681 	adc	a, #0x00
+   02CB 47                  682 	ld	b,a
+   02CC C5                  683 	push	bc
+   02CD CDr00r00            684 	call	_rand
+   02D0 C1                  685 	pop	bc
+   02D1 C5                  686 	push	bc
+   02D2 21 04 00            687 	ld	hl,#0x0004
+   02D5 E5                  688 	push	hl
+   02D6 D5                  689 	push	de
+   02D7 CDr00r00            690 	call	__modsint
+   02DA E8 04               691 	add	sp, #4
+   02DC C1                  692 	pop	bc
+   02DD 7B                  693 	ld	a,e
+   02DE 02                  694 	ld	(bc),a
+                            695 ;shooting.c:82: for (i=0; i != 20; i++) {
+   02DF 21r00r00            696 	ld	hl,#_i
+   02E2 34                  697 	inc	(hl)
+   02E3 7E                  698 	ld	a,(hl)
+   02E4 D6 14               699 	sub	a, #0x14
+   02E6 20 D8               700 	jr	NZ,00109$
+                            701 ;shooting.c:85: set_bkg_tiles(0,j,20,1,randomBkgTiles); // x, y, width, height, background tiles
+   02E8 21r1Ar00            702 	ld	hl,#_randomBkgTiles
+   02EB E5                  703 	push	hl
+   02EC 21 14 01            704 	ld	hl,#0x0114
+   02EF E5                  705 	push	hl
+   02F0 21r01r00            706 	ld	hl,#_j
+   02F3 7E                  707 	ld	a,(hl)
+   02F4 F5                  708 	push	af
+   02F5 33                  709 	inc	sp
+   02F6 AF                  710 	xor	a, a
+   02F7 F5                  711 	push	af
+   02F8 33                  712 	inc	sp
+   02F9 CDr00r00            713 	call	_set_bkg_tiles
+   02FC E8 06               714 	add	sp, #6
+                            715 ;shooting.c:81: for (j=0; j != 18; j++) {
+   02FE 21r01r00            716 	ld	hl,#_j
+   0301 34                  717 	inc	(hl)
+   0302 7E                  718 	ld	a,(hl)
+   0303 D6 12               719 	sub	a, #0x12
+   0305 C2rBBr02            720 	jp	NZ,00111$
+   0308 33                  721 	inc	sp
+   0309 C9                  722 	ret
+                            723 ;shooting.c:90: void updatePlayer() {
+                            724 ;	---------------------------------
+                            725 ; Function updatePlayer
+                            726 ; ---------------------------------
+   030A                     727 _updatePlayer::
+   030A E8 FE               728 	add	sp, #-2
+                            729 ;shooting.c:94: if (joypad() & J_UP) {
+   030C CDr00r00            730 	call	_joypad
+   030F 0E 00               731 	ld	c,#0x00
+   0311 CB 53               732 	bit	2, e
+   0313 CAr86r03            733 	jp	Z,00112$
+                            734 ;shooting.c:96: shooting = 1;
+   0316 21r32r00            735 	ld	hl,#_shooting
+   0319 36 01               736 	ld	(hl),#0x01
+                            737 ;shooting.c:97: playerDir = 0;
+   031B 21r04r00            738 	ld	hl,#_playerDir
+   031E 36 00               739 	ld	(hl),#0x00
+                            740 ;shooting.c:99: if (bullets[0].alive == 0) {
+   0320 FAr35r00            741 	ld	a, (#(_bullets + 0x0002) + 0)
+   0323 B7                  742 	or	a, a
+   0324 C2r79r03            743 	jp	NZ,00108$
+                            744 ;shooting.c:100: bullets[0].alive = 1;
+   0327 21r35r00            745 	ld	hl,#(_bullets + 0x0002)
+   032A 36 01               746 	ld	(hl),#0x01
+                            747 ;shooting.c:101: playerY += 2;
+   032C 21r03r00            748 	ld	hl,#_playerY
+   032F 34                  749 	inc	(hl)
+   0330 34                  750 	inc	(hl)
+                            751 ;shooting.c:103: if (joypad() & J_LEFT) {
+   0331 CDr00r00            752 	call	_joypad
+   0334 4B                  753 	ld	c,e
+   0335 06 00               754 	ld	b,#0x00
+                            755 ;shooting.c:104: bullets[0].direction = 4;
+                            756 ;shooting.c:103: if (joypad() & J_LEFT) {
+   0337 CB 49               757 	bit	1, c
+   0339 28 07               758 	jr	Z,00105$
+                            759 ;shooting.c:104: bullets[0].direction = 4;
+   033B 21r36r00            760 	ld	hl,#(_bullets + 0x0003)
+   033E 36 04               761 	ld	(hl),#0x04
+   0340 18 15               762 	jr	00106$
+   0342                     763 00105$:
+                            764 ;shooting.c:105: } else if (joypad() & J_RIGHT) {
+   0342 CDr00r00            765 	call	_joypad
+   0345 0E 00               766 	ld	c,#0x00
+   0347 CB 43               767 	bit	0, e
+   0349 28 07               768 	jr	Z,00102$
+                            769 ;shooting.c:106: bullets[0].direction = 5;
+   034B 21r36r00            770 	ld	hl,#(_bullets + 0x0003)
+   034E 36 05               771 	ld	(hl),#0x05
+   0350 18 05               772 	jr	00106$
+   0352                     773 00102$:
+                            774 ;shooting.c:108: bullets[0].direction = 0;
+   0352 21r36r00            775 	ld	hl,#(_bullets + 0x0003)
+   0355 36 00               776 	ld	(hl),#0x00
+   0357                     777 00106$:
+                            778 ;shooting.c:111: bullets[0].x = playerX;
+   0357 11r33r00            779 	ld	de,#_bullets
+   035A 21r02r00            780 	ld	hl,#_playerX
+   035D 7E                  781 	ld	a,(hl)
+   035E 12                  782 	ld	(de),a
+                            783 ;shooting.c:112: bullets[0].y = playerY;
+   035F 11r34r00            784 	ld	de,#(_bullets + 0x0001)
+   0362 21r03r00            785 	ld	hl,#_playerY
+   0365 7E                  786 	ld	a,(hl)
+   0366 12                  787 	ld	(de),a
+                            788 ;shooting.c:113: move_sprite(12, bullets[0].x, bullets[0].y); // places sprite on screen
+   0367 7E                  789 	ld	a,(hl)
+   0368 F5                  790 	push	af
+   0369 33                  791 	inc	sp
+   036A 21r02r00            792 	ld	hl,#_playerX
+   036D 7E                  793 	ld	a,(hl)
+   036E F5                  794 	push	af
+   036F 33                  795 	inc	sp
+   0370 3E 0C               796 	ld	a,#0x0c
+   0372 F5                  797 	push	af
+   0373 33                  798 	inc	sp
+   0374 CDr00r00            799 	call	_move_sprite
+   0377 E8 03               800 	add	sp, #3
+   0379                     801 00108$:
+                            802 ;shooting.c:115: if (playerY == 15) {
+   0379 21r03r00            803 	ld	hl,#_playerY
+   037C 7E                  804 	ld	a,(hl)
+   037D D6 0F               805 	sub	a, #0x0f
+   037F 20 05               806 	jr	NZ,00112$
+                            807 ;shooting.c:116: playerY = 16;
+   0381 21r03r00            808 	ld	hl,#_playerY
+   0384 36 10               809 	ld	(hl),#0x10
+   0386                     810 00112$:
+                            811 ;shooting.c:120: if (joypad() & J_DOWN){
+   0386 CDr00r00            812 	call	_joypad
+   0389 0E 00               813 	ld	c,#0x00
+   038B CB 5B               814 	bit	3, e
+   038D CArFFr03            815 	jp	Z,00124$
+                            816 ;shooting.c:122: shooting = 1;
+   0390 21r32r00            817 	ld	hl,#_shooting
+   0393 36 01               818 	ld	(hl),#0x01
+                            819 ;shooting.c:123: playerDir = 2;
+   0395 21r04r00            820 	ld	hl,#_playerDir
+   0398 36 02               821 	ld	(hl),#0x02
+                            822 ;shooting.c:125: if (bullets[0].alive == 0) {
+   039A 01r35r00            823 	ld	bc,#_bullets + 2
+   039D 0A                  824 	ld	a,(bc)
+   039E B7                  825 	or	a, a
+   039F C2rF2r03            826 	jp	NZ,00120$
+                            827 ;shooting.c:126: bullets[0].alive = 1;
+   03A2 3E 01               828 	ld	a,#0x01
+   03A4 02                  829 	ld	(bc),a
+                            830 ;shooting.c:127: playerY -= 2;
+   03A5 21r03r00            831 	ld	hl,#_playerY
+   03A8 35                  832 	dec	(hl)
+   03A9 35                  833 	dec	(hl)
+                            834 ;shooting.c:129: if (joypad() & J_LEFT) {
+   03AA CDr00r00            835 	call	_joypad
+   03AD 4B                  836 	ld	c,e
+   03AE 06 00               837 	ld	b,#0x00
+                            838 ;shooting.c:130: bullets[0].direction = 7;
+                            839 ;shooting.c:129: if (joypad() & J_LEFT) {
+   03B0 CB 49               840 	bit	1, c
+   03B2 28 07               841 	jr	Z,00117$
+                            842 ;shooting.c:130: bullets[0].direction = 7;
+   03B4 21r36r00            843 	ld	hl,#(_bullets + 0x0003)
+   03B7 36 07               844 	ld	(hl),#0x07
+   03B9 18 15               845 	jr	00118$
+   03BB                     846 00117$:
+                            847 ;shooting.c:131: } else if (joypad() & J_RIGHT) {
+   03BB CDr00r00            848 	call	_joypad
+   03BE 0E 00               849 	ld	c,#0x00
+   03C0 CB 43               850 	bit	0, e
+   03C2 28 07               851 	jr	Z,00114$
+                            852 ;shooting.c:132: bullets[0].direction = 6;
+   03C4 21r36r00            853 	ld	hl,#(_bullets + 0x0003)
+   03C7 36 06               854 	ld	(hl),#0x06
+   03C9 18 05               855 	jr	00118$
+   03CB                     856 00114$:
+                            857 ;shooting.c:134: bullets[0].direction = 2;
+   03CB 21r36r00            858 	ld	hl,#(_bullets + 0x0003)
+   03CE 36 02               859 	ld	(hl),#0x02
+   03D0                     860 00118$:
+                            861 ;shooting.c:137: bullets[0].x = playerX;
+   03D0 11r33r00            862 	ld	de,#_bullets
+   03D3 21r02r00            863 	ld	hl,#_playerX
+   03D6 7E                  864 	ld	a,(hl)
+   03D7 12                  865 	ld	(de),a
+                            866 ;shooting.c:138: bullets[0].y = playerY;
+   03D8 11r34r00            867 	ld	de,#(_bullets + 0x0001)
+   03DB 21r03r00            868 	ld	hl,#_playerY
+   03DE 7E                  869 	ld	a,(hl)
+   03DF 12                  870 	ld	(de),a
+                            871 ;shooting.c:139: move_sprite(12, bullets[0].x, bullets[0].y); // places sprite on screen
+   03E0 7E                  872 	ld	a,(hl)
+   03E1 F5                  873 	push	af
+   03E2 33                  874 	inc	sp
+   03E3 21r02r00            875 	ld	hl,#_playerX
+   03E6 7E                  876 	ld	a,(hl)
+   03E7 F5                  877 	push	af
+   03E8 33                  878 	inc	sp
+   03E9 3E 0C               879 	ld	a,#0x0c
+   03EB F5                  880 	push	af
+   03EC 33                  881 	inc	sp
+   03ED CDr00r00            882 	call	_move_sprite
+   03F0 E8 03               883 	add	sp, #3
+   03F2                     884 00120$:
+                            885 ;shooting.c:141: if (playerY == 153){
+   03F2 21r03r00            886 	ld	hl,#_playerY
+   03F5 7E                  887 	ld	a,(hl)
+   03F6 D6 99               888 	sub	a, #0x99
+   03F8 20 05               889 	jr	NZ,00124$
+                            890 ;shooting.c:142: playerY = 152;
+   03FA 21r03r00            891 	ld	hl,#_playerY
+   03FD 36 98               892 	ld	(hl),#0x98
+   03FF                     893 00124$:
+                            894 ;shooting.c:146: if (joypad() & J_LEFT){
+   03FF CDr00r00            895 	call	_joypad
+   0402 0E 00               896 	ld	c,#0x00
+   0404 CB 4B               897 	bit	1, e
+   0406 CAr56r04            898 	jp	Z,00130$
+                            899 ;shooting.c:148: shooting = 1;
+   0409 21r32r00            900 	ld	hl,#_shooting
+   040C 36 01               901 	ld	(hl),#0x01
+                            902 ;shooting.c:149: playerDir = 3;
+   040E 21r04r00            903 	ld	hl,#_playerDir
+   0411 36 03               904 	ld	(hl),#0x03
+                            905 ;shooting.c:151: if (bullets[0].alive == 0) {
+   0413 01r35r00            906 	ld	bc,#_bullets + 2
+   0416 0A                  907 	ld	a,(bc)
+   0417 B7                  908 	or	a, a
+   0418 20 2F               909 	jr	NZ,00126$
+                            910 ;shooting.c:152: bullets[0].alive = 1;
+   041A 3E 01               911 	ld	a,#0x01
+   041C 02                  912 	ld	(bc),a
+                            913 ;shooting.c:153: playerX += 2;
+   041D 21r02r00            914 	ld	hl,#_playerX
+   0420 34                  915 	inc	(hl)
+   0421 34                  916 	inc	(hl)
+                            917 ;shooting.c:154: bullets[0].direction = 3;
+   0422 21r36r00            918 	ld	hl,#(_bullets + 0x0003)
+   0425 36 03               919 	ld	(hl),#0x03
+                            920 ;shooting.c:155: bullets[0].x = playerX;
+   0427 11r33r00            921 	ld	de,#_bullets
+   042A 21r02r00            922 	ld	hl,#_playerX
+   042D 7E                  923 	ld	a,(hl)
+   042E 12                  924 	ld	(de),a
+                            925 ;shooting.c:156: bullets[0].y = playerY;
+   042F 11r34r00            926 	ld	de,#(_bullets + 0x0001)
+   0432 21r03r00            927 	ld	hl,#_playerY
+   0435 7E                  928 	ld	a,(hl)
+   0436 12                  929 	ld	(de),a
+                            930 ;shooting.c:157: move_sprite(12, bullets[0].x, bullets[0].y); // places sprite on screen
+   0437 7E                  931 	ld	a,(hl)
+   0438 F5                  932 	push	af
+   0439 33                  933 	inc	sp
+   043A 21r02r00            934 	ld	hl,#_playerX
+   043D 7E                  935 	ld	a,(hl)
+   043E F5                  936 	push	af
+   043F 33                  937 	inc	sp
+   0440 3E 0C               938 	ld	a,#0x0c
+   0442 F5                  939 	push	af
+   0443 33                  940 	inc	sp
+   0444 CDr00r00            941 	call	_move_sprite
+   0447 E8 03               942 	add	sp, #3
+   0449                     943 00126$:
+                            944 ;shooting.c:159: if (playerX == 7){
+   0449 21r02r00            945 	ld	hl,#_playerX
+   044C 7E                  946 	ld	a,(hl)
+   044D D6 07               947 	sub	a, #0x07
+   044F 20 05               948 	jr	NZ,00130$
+                            949 ;shooting.c:160: playerX = 8;
+   0451 21r02r00            950 	ld	hl,#_playerX
+   0454 36 08               951 	ld	(hl),#0x08
+   0456                     952 00130$:
+                            953 ;shooting.c:164: if (joypad() & J_RIGHT){
+   0456 CDr00r00            954 	call	_joypad
+   0459 0E 00               955 	ld	c,#0x00
+   045B CB 43               956 	bit	0, e
+   045D CArADr04            957 	jp	Z,00136$
+                            958 ;shooting.c:166: shooting = 1;
+   0460 21r32r00            959 	ld	hl,#_shooting
+   0463 36 01               960 	ld	(hl),#0x01
+                            961 ;shooting.c:167: playerDir = 1;
+   0465 21r04r00            962 	ld	hl,#_playerDir
+   0468 36 01               963 	ld	(hl),#0x01
+                            964 ;shooting.c:169: if (bullets[0].alive == 0) {
+   046A 01r35r00            965 	ld	bc,#_bullets + 2
+   046D 0A                  966 	ld	a,(bc)
+   046E B7                  967 	or	a, a
+   046F 20 2F               968 	jr	NZ,00132$
+                            969 ;shooting.c:170: bullets[0].alive = 1;
+   0471 3E 01               970 	ld	a,#0x01
+   0473 02                  971 	ld	(bc),a
+                            972 ;shooting.c:171: playerX -= 2;
+   0474 21r02r00            973 	ld	hl,#_playerX
+   0477 35                  974 	dec	(hl)
+   0478 35                  975 	dec	(hl)
+                            976 ;shooting.c:172: bullets[0].direction = 1;
+   0479 21r36r00            977 	ld	hl,#(_bullets + 0x0003)
+   047C 36 01               978 	ld	(hl),#0x01
+                            979 ;shooting.c:173: bullets[0].x = playerX;
+   047E 11r33r00            980 	ld	de,#_bullets
+   0481 21r02r00            981 	ld	hl,#_playerX
+   0484 7E                  982 	ld	a,(hl)
+   0485 12                  983 	ld	(de),a
+                            984 ;shooting.c:174: bullets[0].y = playerY;
+   0486 11r34r00            985 	ld	de,#(_bullets + 0x0001)
+   0489 21r03r00            986 	ld	hl,#_playerY
+   048C 7E                  987 	ld	a,(hl)
+   048D 12                  988 	ld	(de),a
+                            989 ;shooting.c:175: move_sprite(12, bullets[0].x, bullets[0].y); // places sprite on screen
+   048E 7E                  990 	ld	a,(hl)
+   048F F5                  991 	push	af
+   0490 33                  992 	inc	sp
+   0491 21r02r00            993 	ld	hl,#_playerX
+   0494 7E                  994 	ld	a,(hl)
+   0495 F5                  995 	push	af
+   0496 33                  996 	inc	sp
+   0497 3E 0C               997 	ld	a,#0x0c
+   0499 F5                  998 	push	af
+   049A 33                  999 	inc	sp
+   049B CDr00r00           1000 	call	_move_sprite
+   049E E8 03              1001 	add	sp, #3
+   04A0                    1002 00132$:
+                           1003 ;shooting.c:177: if (playerX == 161){
+   04A0 21r02r00           1004 	ld	hl,#_playerX
+   04A3 7E                 1005 	ld	a,(hl)
+   04A4 D6 A1              1006 	sub	a, #0xa1
+   04A6 20 05              1007 	jr	NZ,00136$
+                           1008 ;shooting.c:178: playerX = 160;
+   04A8 21r02r00           1009 	ld	hl,#_playerX
+   04AB 36 A0              1010 	ld	(hl),#0xa0
+   04AD                    1011 00136$:
+                           1012 ;shooting.c:183: if (joypad() & J_A) {
+   04AD CDr00r00           1013 	call	_joypad
+   04B0 0E 00              1014 	ld	c,#0x00
+   04B2 CB 63              1015 	bit	4, e
+   04B4 28 1F              1016 	jr	Z,00141$
+                           1017 ;shooting.c:184: NR11_REG = 0x7f; // audio channel #1, wave pattern duty
+   04B6 21 11 FF           1018 	ld	hl,#0xff11
+   04B9 36 7F              1019 	ld	(hl),#0x7f
+                           1020 ;shooting.c:185: NR12_REG = 0x7f; // volume for 11
+   04BB 2E 12              1021 	ld	l, #0x12
+   04BD 36 7F              1022 	ld	(hl),#0x7f
+                           1023 ;shooting.c:186: NR13_REG = DIV_REG; // sound frequency least significant bit
+   04BF 11 04 FF           1024 	ld	de,#0xff04
+   04C2 1A                 1025 	ld	a,(de)
+   04C3 11 13 FF           1026 	ld	de,#0xff13
+   04C6 12                 1027 	ld	(de),a
+                           1028 ;shooting.c:187: NR14_REG = 0x80 + (DIV_REG % 8); // sound frequency significant 3 bits
+   04C7 11 04 FF           1029 	ld	de,#0xff04
+   04CA 1A                 1030 	ld	a,(de)
+   04CB E6 07              1031 	and	a, #0x07
+   04CD C6 80              1032 	add	a, #0x80
+   04CF 11 14 FF           1033 	ld	de,#0xff14
+   04D2 12                 1034 	ld	(de),a
+   04D3 18 1F              1035 	jr	00142$
+   04D5                    1036 00141$:
+                           1037 ;shooting.c:188: } else if (joypad() & J_B) {
+   04D5 CDr00r00           1038 	call	_joypad
+   04D8 0E 00              1039 	ld	c,#0x00
+   04DA CB 6B              1040 	bit	5, e
+   04DC 20 16              1041 	jr	NZ,00142$
+                           1042 ;shooting.c:192: NR11_REG = 0x00;
+   04DE 21 11 FF           1043 	ld	hl,#0xff11
+   04E1 36 00              1044 	ld	(hl),#0x00
+                           1045 ;shooting.c:193: NR12_REG = 0x00;
+   04E3 2E 12              1046 	ld	l, #0x12
+   04E5 36 00              1047 	ld	(hl),#0x00
+                           1048 ;shooting.c:194: NR13_REG = 0x00;
+   04E7 2E 13              1049 	ld	l, #0x13
+   04E9 36 00              1050 	ld	(hl),#0x00
+                           1051 ;shooting.c:195: NR14_REG = 0x00;
+   04EB 2E 14              1052 	ld	l, #0x14
+   04ED 36 00              1053 	ld	(hl),#0x00
+                           1054 ;shooting.c:197: shooting = 0;
+   04EF 21r32r00           1055 	ld	hl,#_shooting
+   04F2 36 00              1056 	ld	(hl),#0x00
+   04F4                    1057 00142$:
+                           1058 ;shooting.c:200: move_sprite(0,playerX,playerY); // position player sprite on screen
+   04F4 21r03r00           1059 	ld	hl,#_playerY
+   04F7 7E                 1060 	ld	a,(hl)
+   04F8 F5                 1061 	push	af
+   04F9 33                 1062 	inc	sp
+   04FA 21r02r00           1063 	ld	hl,#_playerX
+   04FD 7E                 1064 	ld	a,(hl)
+   04FE F5                 1065 	push	af
+   04FF 33                 1066 	inc	sp
+   0500 AF                 1067 	xor	a, a
+   0501 F5                 1068 	push	af
+   0502 33                 1069 	inc	sp
+   0503 CDr00r00           1070 	call	_move_sprite
+   0506 E8 03              1071 	add	sp, #3
+                           1072 ;shooting.c:202: if (bullets[0].x > 160 || bullets[0].x == 0 || bullets[0].y > 152 || bullets[0].y == 0) {
+   0508 11r33r00           1073 	ld	de, #_bullets + 0
+   050B 1A                 1074 	ld	a,(de)
+   050C 4F                 1075 	ld	c,a
+   050D 3E A0              1076 	ld	a,#0xa0
+   050F 91                 1077 	sub	a, c
+   0510 38 15              1078 	jr	C,00160$
+   0512 79                 1079 	ld	a,c
+   0513 B7                 1080 	or	a, a
+   0514 28 11              1081 	jr	Z,00160$
+   0516 01r34r00           1082 	ld	bc,#_bullets + 1
+   0519 0A                 1083 	ld	a,(bc)
+   051A F8 01              1084 	ldhl	sp,#1
+   051C 77                 1085 	ld	(hl),a
+   051D 3E 98              1086 	ld	a,#0x98
+   051F 96                 1087 	sub	a, (hl)
+   0520 38 05              1088 	jr	C,00160$
+   0522 7E                 1089 	ld	a,(hl)
+   0523 B7                 1090 	or	a, a
+   0524 C2rADr05           1091 	jp	NZ,00161$
+   0527                    1092 00160$:
+                           1093 ;shooting.c:203: if (shooting == 1) {
+   0527 21r32r00           1094 	ld	hl,#_shooting
+   052A 7E                 1095 	ld	a,(hl)
+   052B 3D                 1096 	dec	a
+   052C C2r9Br05           1097 	jp	NZ,00149$
+                           1098 ;shooting.c:204: bullets[0].alive = 1;
+   052F 11r33r00           1099 	ld	de,#_bullets+0
+   0532 4B                 1100 	ld	c,e
+   0533 42                 1101 	ld	b,d
+   0534 21r35r00           1102 	ld	hl,#(_bullets + 0x0002)
+   0537 36 01              1103 	ld	(hl),#0x01
+                           1104 ;shooting.c:205: switch (playerDir) {
+   0539 3E 03              1105 	ld	a,#0x03
+   053B 21r04r00           1106 	ld	hl,#_playerDir
+   053E 96                 1107 	sub	a, (hl)
+   053F DAr40r06           1108 	jp	C,00162$
+                           1109 ;shooting.c:208: bullets[0].y = playerY - 8;
+                           1110 ;shooting.c:211: bullets[0].x = playerX + 8;
+   0542 21r02r00           1111 	ld	hl,#_playerX
+   0545 7E                 1112 	ld	a,(hl)
+   0546 C6 08              1113 	add	a, #0x08
+   0548 5F                 1114 	ld	e,a
+                           1115 ;shooting.c:205: switch (playerDir) {
+   0549 21r04r00           1116 	ld	hl,#_playerDir
+   054C 5E                 1117 	ld	e,(hl)
+   054D 16 00              1118 	ld	d,#0x00
+   054F 21r55r05           1119 	ld	hl,#00309$
+   0552 19                 1120 	add	hl,de
+   0553 19                 1121 	add	hl,de
+                           1122 ;shooting.c:206: case 0:
+   0554 E9                 1123 	jp	(hl)
+   0555                    1124 00309$:
+   0555 18 06              1125 	jr	00143$
+   0557 18 16              1126 	jr	00144$
+   0559 18 21              1127 	jr	00145$
+   055B 18 31              1128 	jr	00146$
+   055D                    1129 00143$:
+                           1130 ;shooting.c:207: bullets[0].x = playerX;
+   055D 21r02r00           1131 	ld	hl,#_playerX
+   0560 7E                 1132 	ld	a,(hl)
+   0561 02                 1133 	ld	(bc),a
+                           1134 ;shooting.c:208: bullets[0].y = playerY - 8;
+   0562 21r03r00           1135 	ld	hl,#_playerY
+   0565 7E                 1136 	ld	a,(hl)
+   0566 C6 F8              1137 	add	a,#0xf8
+   0568 11r34r00           1138 	ld	de,#(_bullets + 0x0001)
+   056B 12                 1139 	ld	(de),a
+                           1140 ;shooting.c:209: break;
+   056C C3r40r06           1141 	jp	00162$
+                           1142 ;shooting.c:210: case 1:
+   056F                    1143 00144$:
+                           1144 ;shooting.c:211: bullets[0].x = playerX + 8;
+   056F 7B                 1145 	ld	a,e
+   0570 02                 1146 	ld	(bc),a
+                           1147 ;shooting.c:212: bullets[0].y = playerY;
+   0571 11r34r00           1148 	ld	de,#(_bullets + 0x0001)
+   0574 21r03r00           1149 	ld	hl,#_playerY
+   0577 7E                 1150 	ld	a,(hl)
+   0578 12                 1151 	ld	(de),a
+                           1152 ;shooting.c:213: break;
+   0579 C3r40r06           1153 	jp	00162$
+                           1154 ;shooting.c:214: case 2:
+   057C                    1155 00145$:
+                           1156 ;shooting.c:215: bullets[0].x = playerX;
+   057C 21r02r00           1157 	ld	hl,#_playerX
+   057F 7E                 1158 	ld	a,(hl)
+   0580 02                 1159 	ld	(bc),a
+                           1160 ;shooting.c:216: bullets[0].y = playerY - 8;
+   0581 21r03r00           1161 	ld	hl,#_playerY
+   0584 7E                 1162 	ld	a,(hl)
+   0585 C6 F8              1163 	add	a,#0xf8
+   0587 11r34r00           1164 	ld	de,#(_bullets + 0x0001)
+   058A 12                 1165 	ld	(de),a
+                           1166 ;shooting.c:217: break;
+   058B C3r40r06           1167 	jp	00162$
+                           1168 ;shooting.c:218: case 3:
+   058E                    1169 00146$:
+                           1170 ;shooting.c:219: bullets[0].x = playerX + 8;
+   058E 7B                 1171 	ld	a,e
+   058F 02                 1172 	ld	(bc),a
+                           1173 ;shooting.c:220: bullets[0].y = playerY;
+   0590 11r34r00           1174 	ld	de,#(_bullets + 0x0001)
+   0593 21r03r00           1175 	ld	hl,#_playerY
+   0596 7E                 1176 	ld	a,(hl)
+   0597 12                 1177 	ld	(de),a
+                           1178 ;shooting.c:222: }
+   0598 C3r40r06           1179 	jp	00162$
+   059B                    1180 00149$:
+                           1181 ;shooting.c:224: bullets[0].alive = 0;
+   059B 21r35r00           1182 	ld	hl,#(_bullets + 0x0002)
+   059E 36 00              1183 	ld	(hl),#0x00
+                           1184 ;shooting.c:225: bullets[0].x = 0;
+   05A0 21r33r00           1185 	ld	hl,#_bullets
+   05A3 36 00              1186 	ld	(hl),#0x00
+                           1187 ;shooting.c:226: bullets[0].y = 0;
+   05A5 21r34r00           1188 	ld	hl,#(_bullets + 0x0001)
+   05A8 36 00              1189 	ld	(hl),#0x00
+   05AA C3r40r06           1190 	jp	00162$
+   05AD                    1191 00161$:
+                           1192 ;shooting.c:229: switch (bullets[0].direction) {
+   05AD 11r36r00           1193 	ld	de, #(_bullets + 0x0003) + 0
+   05B0 1A                 1194 	ld	a,(de)
+   05B1 F8 00              1195 	ldhl	sp,#0
+   05B3 77                 1196 	ld	(hl),a
+   05B4 3E 07              1197 	ld	a,#0x07
+   05B6 96                 1198 	sub	a, (hl)
+   05B7 DAr40r06           1199 	jp	C,00162$
+   05BA 5E                 1200 	ld	e,(hl)
+   05BB 16 00              1201 	ld	d,#0x00
+   05BD 21rC4r05           1202 	ld	hl,#00310$
+   05C0 19                 1203 	add	hl,de
+   05C1 19                 1204 	add	hl,de
+   05C2 19                 1205 	add	hl,de
+   05C3 E9                 1206 	jp	(hl)
+   05C4                    1207 00310$:
+   05C4 C3rDCr05           1208 	jp	00151$
+   05C7 C3rE5r05           1209 	jp	00152$
+   05CA C3rF1r05           1210 	jp	00153$
+   05CD C3rFAr05           1211 	jp	00154$
+   05D0 C3r06r06           1212 	jp	00155$
+   05D3 C3r15r06           1213 	jp	00156$
+   05D6 C3r24r06           1214 	jp	00157$
+   05D9 C3r33r06           1215 	jp	00158$
+                           1216 ;shooting.c:230: case 0:
+   05DC                    1217 00151$:
+                           1218 ;shooting.c:231: bullets[0].y -= 5;
+   05DC F8 01              1219 	ldhl	sp,#1
+   05DE 7E                 1220 	ld	a,(hl)
+   05DF C6 FB              1221 	add	a,#0xfb
+   05E1 02                 1222 	ld	(bc),a
+                           1223 ;shooting.c:232: break;
+   05E2 C3r40r06           1224 	jp	00162$
+                           1225 ;shooting.c:233: case 1:
+   05E5                    1226 00152$:
+                           1227 ;shooting.c:234: bullets[0].x += 5;
+   05E5 FAr33r00           1228 	ld	a, (#_bullets + 0)
+   05E8 C6 05              1229 	add	a, #0x05
+   05EA 11r33r00           1230 	ld	de,#_bullets
+   05ED 12                 1231 	ld	(de),a
+                           1232 ;shooting.c:235: break;
+   05EE C3r40r06           1233 	jp	00162$
+                           1234 ;shooting.c:236: case 2:
+   05F1                    1235 00153$:
+                           1236 ;shooting.c:237: bullets[0].y += 5;
+   05F1 F8 01              1237 	ldhl	sp,#1
+   05F3 7E                 1238 	ld	a,(hl)
+   05F4 C6 05              1239 	add	a, #0x05
+   05F6 02                 1240 	ld	(bc),a
+                           1241 ;shooting.c:238: break;
+   05F7 C3r40r06           1242 	jp	00162$
+                           1243 ;shooting.c:239: case 3:
+   05FA                    1244 00154$:
+                           1245 ;shooting.c:240: bullets[0].x -= 5;
+   05FA FAr33r00           1246 	ld	a, (#_bullets + 0)
+   05FD C6 FB              1247 	add	a,#0xfb
+   05FF 11r33r00           1248 	ld	de,#_bullets
+   0602 12                 1249 	ld	(de),a
+                           1250 ;shooting.c:241: break;
+   0603 C3r40r06           1251 	jp	00162$
+                           1252 ;shooting.c:242: case 4:
+   0606                    1253 00155$:
+                           1254 ;shooting.c:243: bullets[0].x -= 5;
+   0606 FAr33r00           1255 	ld	a, (#_bullets + 0)
+   0609 C6 FB              1256 	add	a,#0xfb
+   060B 11r33r00           1257 	ld	de,#_bullets
+   060E 12                 1258 	ld	(de),a
+                           1259 ;shooting.c:244: bullets[0].y -= 5;
+   060F 0A                 1260 	ld	a,(bc)
+   0610 C6 FB              1261 	add	a,#0xfb
+   0612 02                 1262 	ld	(bc),a
+                           1263 ;shooting.c:245: break;
+   0613 18 2B              1264 	jr	00162$
+                           1265 ;shooting.c:246: case 5:
+   0615                    1266 00156$:
+                           1267 ;shooting.c:247: bullets[0].x += 5;
+   0615 FAr33r00           1268 	ld	a, (#_bullets + 0)
+   0618 C6 05              1269 	add	a, #0x05
+   061A 11r33r00           1270 	ld	de,#_bullets
+   061D 12                 1271 	ld	(de),a
+                           1272 ;shooting.c:248: bullets[0].y -= 5;
+   061E 0A                 1273 	ld	a,(bc)
+   061F C6 FB              1274 	add	a,#0xfb
+   0621 02                 1275 	ld	(bc),a
+                           1276 ;shooting.c:249: break;
+   0622 18 1C              1277 	jr	00162$
+                           1278 ;shooting.c:250: case 6:
+   0624                    1279 00157$:
+                           1280 ;shooting.c:251: bullets[0].x += 5;
+   0624 FAr33r00           1281 	ld	a, (#_bullets + 0)
+   0627 C6 05              1282 	add	a, #0x05
+   0629 11r33r00           1283 	ld	de,#_bullets
+   062C 12                 1284 	ld	(de),a
+                           1285 ;shooting.c:252: bullets[0].y += 5;
+   062D 0A                 1286 	ld	a,(bc)
+   062E C6 05              1287 	add	a, #0x05
+   0630 02                 1288 	ld	(bc),a
+                           1289 ;shooting.c:253: break;
+   0631 18 0D              1290 	jr	00162$
+                           1291 ;shooting.c:254: case 7:
+   0633                    1292 00158$:
+                           1293 ;shooting.c:255: bullets[0].x -= 5;
+   0633 FAr33r00           1294 	ld	a, (#_bullets + 0)
+   0636 C6 FB              1295 	add	a,#0xfb
+   0638 11r33r00           1296 	ld	de,#_bullets
+   063B 12                 1297 	ld	(de),a
+                           1298 ;shooting.c:256: bullets[0].y += 5;
+   063C 0A                 1299 	ld	a,(bc)
+   063D C6 05              1300 	add	a, #0x05
+   063F 02                 1301 	ld	(bc),a
+                           1302 ;shooting.c:258: }
+   0640                    1303 00162$:
+                           1304 ;shooting.c:261: move_sprite(12, bullets[0].x, bullets[0].y);
+   0640 11r34r00           1305 	ld	de, #(_bullets + 0x0001) + 0
+   0643 1A                 1306 	ld	a,(de)
+   0644 47                 1307 	ld	b,a
+   0645 FAr33r00           1308 	ld	a, (#_bullets + 0)
+   0648 C5                 1309 	push	bc
+   0649 33                 1310 	inc	sp
+   064A F5                 1311 	push	af
+   064B 33                 1312 	inc	sp
+   064C 3E 0C              1313 	ld	a,#0x0c
+   064E F5                 1314 	push	af
+   064F 33                 1315 	inc	sp
+   0650 CDr00r00           1316 	call	_move_sprite
+   0653 E8 03              1317 	add	sp, #3
+                           1318 ;shooting.c:263: j = 0; // re use j for collision - saves space
+   0655 21r01r00           1319 	ld	hl,#_j
+   0658 36 00              1320 	ld	(hl),#0x00
+                           1321 ;shooting.c:265: for (i=0; i != 10; i++) {
+   065A 21r00r00           1322 	ld	hl,#_i
+   065D 36 00              1323 	ld	(hl),#0x00
+   065F                    1324 00172$:
+                           1325 ;shooting.c:266: if (collisionCheck(playerX, playerY, 8, 8, eX[i], eY[i], 8, 8) == 1){
+   065F 3Er0F              1326 	ld	a,#<(_eY)
+   0661 21r00r00           1327 	ld	hl,#_i
+   0664 86                 1328 	add	a, (hl)
+   0665 4F                 1329 	ld	c,a
+   0666 3Es00              1330 	ld	a,#>(_eY)
+   0668 CE 00              1331 	adc	a, #0x00
+   066A 47                 1332 	ld	b,a
+   066B 0A                 1333 	ld	a,(bc)
+   066C F8 00              1334 	ldhl	sp,#0
+   066E 77                 1335 	ld	(hl),a
+   066F 3Er05              1336 	ld	a,#<(_eX)
+   0671 21r00r00           1337 	ld	hl,#_i
+   0674 86                 1338 	add	a, (hl)
+   0675 4F                 1339 	ld	c,a
+   0676 3Es00              1340 	ld	a,#>(_eX)
+   0678 CE 00              1341 	adc	a, #0x00
+   067A 47                 1342 	ld	b,a
+   067B 0A                 1343 	ld	a,(bc)
+   067C 47                 1344 	ld	b,a
+   067D 21 08 08           1345 	ld	hl,#0x0808
+   0680 E5                 1346 	push	hl
+   0681 F8 02              1347 	ldhl	sp,#2
+   0683 7E                 1348 	ld	a,(hl)
+   0684 F5                 1349 	push	af
+   0685 33                 1350 	inc	sp
+   0686 C5                 1351 	push	bc
+   0687 33                 1352 	inc	sp
+   0688 21 08 08           1353 	ld	hl,#0x0808
+   068B E5                 1354 	push	hl
+   068C 21r03r00           1355 	ld	hl,#_playerY
+   068F 7E                 1356 	ld	a,(hl)
+   0690 F5                 1357 	push	af
+   0691 33                 1358 	inc	sp
+   0692 21r02r00           1359 	ld	hl,#_playerX
+   0695 7E                 1360 	ld	a,(hl)
+   0696 F5                 1361 	push	af
+   0697 33                 1362 	inc	sp
+   0698 CDrCDr06           1363 	call	_collisionCheck
+   069B E8 08              1364 	add	sp, #8
+   069D 1D                 1365 	dec	e
+   069E 20 05              1366 	jr	NZ,00173$
+                           1367 ;shooting.c:267: j= 1; // if a collision happens
+   06A0 21r01r00           1368 	ld	hl,#_j
+   06A3 36 01              1369 	ld	(hl),#0x01
+   06A5                    1370 00173$:
+                           1371 ;shooting.c:265: for (i=0; i != 10; i++) {
+   06A5 21r00r00           1372 	ld	hl,#_i
+   06A8 34                 1373 	inc	(hl)
+   06A9 7E                 1374 	ld	a,(hl)
+   06AA D6 0A              1375 	sub	a, #0x0a
+   06AC C2r5Fr06           1376 	jp	NZ,00172$
+                           1377 ;shooting.c:272: switch (j) {
+   06AF 21r01r00           1378 	ld	hl,#_j
+   06B2 7E                 1379 	ld	a,(hl)
+   06B3 B7                 1380 	or	a, a
+   06B4 20 0B              1381 	jr	NZ,00170$
+                           1382 ;shooting.c:275: set_sprite_tile(0,0);
+   06B6 21 00 00           1383 	ld	hl,#0x0000
+   06B9 E5                 1384 	push	hl
+   06BA CDr00r00           1385 	call	_set_sprite_tile
+   06BD E8 02              1386 	add	sp, #2
+                           1387 ;shooting.c:276: break;
+   06BF 18 09              1388 	jr	00174$
+                           1389 ;shooting.c:279: default:
+   06C1                    1390 00170$:
+                           1391 ;shooting.c:280: set_sprite_tile(0,1);
+   06C1 21 00 01           1392 	ld	hl,#0x0100
+   06C4 E5                 1393 	push	hl
+   06C5 CDr00r00           1394 	call	_set_sprite_tile
+   06C8 E8 02              1395 	add	sp, #2
+                           1396 ;shooting.c:282: }
+   06CA                    1397 00174$:
+   06CA E8 02              1398 	add	sp, #2
+   06CC C9                 1399 	ret
+                           1400 ;shooting.c:287: UINT8 collisionCheck(UINT8 x1, UINT8 y1, UINT8 w1, UINT8 h1, UINT8 x2, UINT8 y2, UINT8 w2, UINT8 h2){
+                           1401 ;	---------------------------------
+                           1402 ; Function collisionCheck
+                           1403 ; ---------------------------------
+   06CD                    1404 _collisionCheck::
+   06CD E8 FC              1405 	add	sp, #-4
+                           1406 ;shooting.c:288: if ((x1 < (x2+w2)) && ((x1+w1) > x2) && (y1 < (h2+y2)) && ((y1+h1) > y2)){
+   06CF F8 0A              1407 	ldhl	sp,#10
+   06D1 7E                 1408 	ld	a,(hl)
+   06D2 F8 02              1409 	ldhl	sp,#2
+   06D4 22                 1410 	ld	(hl+),a
+   06D5 36 00              1411 	ld	(hl),#0x00
+   06D7 F8 0C              1412 	ldhl	sp,#12
+   06D9 4E                 1413 	ld	c,(hl)
+   06DA 06 00              1414 	ld	b,#0x00
+   06DC F8 02              1415 	ldhl	sp,#2
+   06DE 2A                 1416 	ld	a,(hl+)
+   06DF 66                 1417 	ld	h,(hl)
+   06E0 6F                 1418 	ld	l,a
+   06E1 09                 1419 	add	hl,bc
+   06E2 4D                 1420 	ld	c,l
+   06E3 44                 1421 	ld	b,h
+   06E4 F8 06              1422 	ldhl	sp,#6
+   06E6 7E                 1423 	ld	a,(hl)
+   06E7 F8 00              1424 	ldhl	sp,#0
+   06E9 22                 1425 	ld	(hl+),a
+   06EA 36 00              1426 	ld	(hl),#0x00
+   06EC 2B                 1427 	dec	hl
+   06ED 7E                 1428 	ld	a, (hl)
+   06EE 91                 1429 	sub	a, c
+   06EF 23                 1430 	inc	hl
+   06F0 7E                 1431 	ld	a, (hl)
+   06F1 98                 1432 	sbc	a, b
+   06F2 56                 1433 	ld	d, (hl)
+   06F3 78                 1434 	ld	a,b
+   06F4 5F                 1435 	ld	e, a
+   06F5 CB 7B              1436 	bit	7, e
+   06F7 28 07              1437 	jr	Z,00125$
+   06F9 CB 7A              1438 	bit	7, d
+   06FB 20 08              1439 	jr	NZ,00126$
+   06FD BF                 1440 	cp	a, a
+   06FE 18 05              1441 	jr	00126$
+   0700                    1442 00125$:
+   0700 CB 7A              1443 	bit	7, d
+   0702 28 01              1444 	jr	Z,00126$
+   0704 37                 1445 	scf
+   0705                    1446 00126$:
+   0705 D2r92r07           1447 	jp	NC,00102$
+   0708 F8 08              1448 	ldhl	sp,#8
+   070A 4E                 1449 	ld	c,(hl)
+   070B 06 00              1450 	ld	b,#0x00
+   070D E1                 1451 	pop	hl
+   070E E5                 1452 	push	hl
+   070F 09                 1453 	add	hl,bc
+   0710 4D                 1454 	ld	c,l
+   0711 44                 1455 	ld	b,h
+   0712 F8 02              1456 	ldhl	sp,#2
+   0714 7E                 1457 	ld	a, (hl)
+   0715 91                 1458 	sub	a, c
+   0716 23                 1459 	inc	hl
+   0717 7E                 1460 	ld	a, (hl)
+   0718 98                 1461 	sbc	a, b
+   0719 56                 1462 	ld	d, (hl)
+   071A 78                 1463 	ld	a,b
+   071B 5F                 1464 	ld	e, a
+   071C CB 7B              1465 	bit	7, e
+   071E 28 07              1466 	jr	Z,00127$
+   0720 CB 7A              1467 	bit	7, d
+   0722 20 08              1468 	jr	NZ,00128$
+   0724 BF                 1469 	cp	a, a
+   0725 18 05              1470 	jr	00128$
+   0727                    1471 00127$:
+   0727 CB 7A              1472 	bit	7, d
+   0729 28 01              1473 	jr	Z,00128$
+   072B 37                 1474 	scf
+   072C                    1475 00128$:
+   072C D2r92r07           1476 	jp	NC,00102$
+   072F F8 0D              1477 	ldhl	sp,#13
+   0731 4E                 1478 	ld	c,(hl)
+   0732 06 00              1479 	ld	b,#0x00
+   0734 2B                 1480 	dec	hl
+   0735 2B                 1481 	dec	hl
+   0736 7E                 1482 	ld	a,(hl)
+   0737 F8 00              1483 	ldhl	sp,#0
+   0739 22                 1484 	ld	(hl+),a
+   073A 36 00              1485 	ld	(hl),#0x00
+   073C E1                 1486 	pop	hl
+   073D E5                 1487 	push	hl
+   073E 09                 1488 	add	hl,bc
+   073F 4D                 1489 	ld	c,l
+   0740 44                 1490 	ld	b,h
+   0741 F8 07              1491 	ldhl	sp,#7
+   0743 7E                 1492 	ld	a,(hl)
+   0744 F8 02              1493 	ldhl	sp,#2
+   0746 22                 1494 	ld	(hl+),a
+   0747 36 00              1495 	ld	(hl),#0x00
+   0749 2B                 1496 	dec	hl
+   074A 7E                 1497 	ld	a, (hl)
+   074B 91                 1498 	sub	a, c
+   074C 23                 1499 	inc	hl
+   074D 7E                 1500 	ld	a, (hl)
+   074E 98                 1501 	sbc	a, b
+   074F 56                 1502 	ld	d, (hl)
+   0750 78                 1503 	ld	a,b
+   0751 5F                 1504 	ld	e, a
+   0752 CB 7B              1505 	bit	7, e
+   0754 28 07              1506 	jr	Z,00129$
+   0756 CB 7A              1507 	bit	7, d
+   0758 20 08              1508 	jr	NZ,00130$
+   075A BF                 1509 	cp	a, a
+   075B 18 05              1510 	jr	00130$
+   075D                    1511 00129$:
+   075D CB 7A              1512 	bit	7, d
+   075F 28 01              1513 	jr	Z,00130$
+   0761 37                 1514 	scf
+   0762                    1515 00130$:
+   0762 D2r92r07           1516 	jp	NC,00102$
+   0765 F8 09              1517 	ldhl	sp,#9
+   0767 4E                 1518 	ld	c,(hl)
+   0768 06 00              1519 	ld	b,#0x00
+   076A F8 02              1520 	ldhl	sp,#2
+   076C 2A                 1521 	ld	a,(hl+)
+   076D 66                 1522 	ld	h,(hl)
+   076E 6F                 1523 	ld	l,a
+   076F 09                 1524 	add	hl,bc
+   0770 4D                 1525 	ld	c,l
+   0771 44                 1526 	ld	b,h
+   0772 F8 00              1527 	ldhl	sp,#0
+   0774 7E                 1528 	ld	a, (hl)
+   0775 91                 1529 	sub	a, c
+   0776 23                 1530 	inc	hl
+   0777 7E                 1531 	ld	a, (hl)
+   0778 98                 1532 	sbc	a, b
+   0779 56                 1533 	ld	d, (hl)
+   077A 78                 1534 	ld	a,b
+   077B 5F                 1535 	ld	e, a
+   077C CB 7B              1536 	bit	7, e
+   077E 28 07              1537 	jr	Z,00131$
+   0780 CB 7A              1538 	bit	7, d
+   0782 20 08              1539 	jr	NZ,00132$
+   0784 BF                 1540 	cp	a, a
+   0785 18 05              1541 	jr	00132$
+   0787                    1542 00131$:
+   0787 CB 7A              1543 	bit	7, d
+   0789 28 01              1544 	jr	Z,00132$
+   078B 37                 1545 	scf
+   078C                    1546 00132$:
+   078C 30 04              1547 	jr	NC,00102$
+                           1548 ;shooting.c:289: return 1;
+   078E 1E 01              1549 	ld	e,#0x01
+   0790 18 02              1550 	jr	00107$
+   0792                    1551 00102$:
+                           1552 ;shooting.c:291: return 0;
+   0792 1E 00              1553 	ld	e,#0x00
+   0794                    1554 00107$:
+   0794 E8 04              1555 	add	sp, #4
+   0796 C9                 1556 	ret
+                           1557 	.area _CODE
+                           1558 	.area _CABS (ABS)
