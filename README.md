@@ -20,8 +20,8 @@ There's quite a bit of info for Gameboy development. Here I'll be listing resour
   * Also, http://cratel.wichita.edu/cratel/ECE238Spr08/software from the same website has lots of example source code and tools.
 * [Assembly Digest](http://assemblydigest.tumblr.com). Collection of tutorials on GB development. Haven't looked at this thoroughly yet.
 * Marat Fayzullin's [GameBoy Homepage](http://fms.komkon.org/GameBoy/). Includes lots of technical information about the Gameboy I'm assuming he compiled while writing an emulator for it. Also check out his [guide](fms.komkon.org/EMUL8/HOWTO.html) on writing emulators.
-* [US Patent 5184830](https://www.google.com/patents/US5184830) for some architecture and video hardware info.
-* [US Patent 5095798](www.google.com/patents/US5095798) for sound system info.
+* [US Patent 5184830](https://patents.google.com/patent/US5184830A/en) for some architecture and video hardware info.
+* [US Patent 5095798](https://patents.google.com/patent/US5095798A/en) for sound system info.
 
 # Open-source examples
 ## GBDK + C
