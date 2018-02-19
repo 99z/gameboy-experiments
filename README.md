@@ -36,6 +36,10 @@ There's quite a bit of info for Gameboy development. Here I'll be listing resour
 ## RGBDS + ASM
 * [Hangman](http://cratel.wichita.edu/blogs/assembly08/2008/05/06/alex-esparza-and-thinh-bui-hangman-term-project/)
 
+# Closed(?) source examples
+Use [mgbdis](https://github.com/mattcurrie/mgbdis) to disassemble these.
+* [Game Boy Demospotting](http://privat.bahnhof.se/wb800787/gb/demos/)
+
 # Other
 Listing of other tools/resources that might be helpful.
 
