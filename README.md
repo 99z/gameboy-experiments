@@ -37,7 +37,7 @@ There's quite a bit of info for Gameboy development. Here I'll be listing resour
 * [Hangman](http://cratel.wichita.edu/blogs/assembly08/2008/05/06/alex-esparza-and-thinh-bui-hangman-term-project/)
 
 # Closed(?) source examples
-Use [gb-disasm](https://github.com/mmuszkow/gb-disasm) to disassemble these.
+Use [mgbdis](https://github.com/mattcurrie/mgbdis) to disassemble these.
 * [Game Boy Demospotting](http://privat.bahnhof.se/wb800787/gb/demos/)
 
 # Other
